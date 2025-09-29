@@ -23,7 +23,7 @@
 #
 # 🔧 Configuración:
 # - Archivos de tickets y logs
-# - Canales de soporte (#ritmolatinos_help) y operadores (#ritmolatinos_ad)
+# - Canales de soporte (#Opers_help) y operadores (#Opers o #Opers_admin) o cambialos segun tu criterio.
 # - Timers de aviso, escalado y autocierre
 # - Ban temporal al finalizar ticket
 # - Límite de solicitudes por usuario
@@ -849,5 +849,6 @@ proc show_system_info {nick uhost hand chan text} {
 putlog "ℹ️ Sistema de Tickets iniciado correctamente"
 
 show_bot_info
+
 
 
