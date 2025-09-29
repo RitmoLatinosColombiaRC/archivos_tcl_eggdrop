@@ -30,11 +30,11 @@
 #
 # 👥 Comandos disponibles
 #
-# Usuarios (en #ritmolatinos_help):
+# Usuarios (en #Opers_Help) o según tu criterio:
 #   !ticket <detalle> → Crear un ticket
 #   !help             → Ver comandos de usuario
 #
-# Operadores (en #ritmolatinos_ad):
+# Operadores (en #Opers) o según tu criterio:
 #   !tickets          → Lista de tickets abiertos
 #   !ayuda <nick|id>  → Tomar un ticket y notificar al usuario
 #   !fin <nick|id>    → Finalizar un ticket, aplicar ban temporal
@@ -849,6 +849,7 @@ proc show_system_info {nick uhost hand chan text} {
 putlog "ℹ️ Sistema de Tickets iniciado correctamente"
 
 show_bot_info
+
 
 
 
