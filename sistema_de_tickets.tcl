@@ -556,9 +556,8 @@ proc close_ticket {nick uhost hand chan text} {
             putserv "PRIVMSG $ops_channel :✔ Ticket $t_id de $tnick cerrado."
             putserv "NOTICE $tnick :✅ Tu ticket #$t_id ha sido cerrado por $nick."
             continue
-        } 
-        # Buscar por nick (cierra todos los tickets del usuario)
-        elseif {$text eq $tnick} {
+            # Buscar por nick (cierra todos los tickets del usuario)
+        } elseif {$text eq $tnick} {
             set found 1
             set user_to_kick $tnick
             set user_host $thost
@@ -857,6 +856,7 @@ proc show_system_info {nick uhost hand chan text} {
 putlog "ℹ️ Sistema de Tickets iniciado correctamente"
 
 show_bot_info
+
 
 
 
