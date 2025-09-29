@@ -20,12 +20,17 @@ profesional, ligero y totalmente integrado con Eggdrop.
 🌐 COMPATIBILIDAD DE SERVIDORES
 ─────────────────────────
 
-Servidor IRC				ChanServ 	Prefijos (o,h,a,q,v) 	Compatibilidad 
+	Servidor IRC				ChanServ 	Prefijos (o,h,a,q,v) 	Compatibilidad 
+
 	UnrealIRCd 				✅ Sí 			✅ Sí 				        ✅ 100% 
-	Hybrid   					✅ Sí 			✅ Sí 				        ✅ 100% 
-	Bahamut 					✅ Sí 			✅ Sí 				        ✅ 100% 
-	InspIRCd   				✅ Sí 			⚠️ Puede variar 		  ⚠️ Ajustes menores 
-	Sin ChanServ     	❌ No 			Depende 			        ❌ No compatible 
+	
+	Hybrid   				✅ Sí 			✅ Sí 				        ✅ 100% 
+	
+	Bahamut 				✅ Sí 			✅ Sí 				        ✅ 100% 
+	
+	InspIRCd   				✅ Sí 			⚠️ Puede variar 		  	⚠️ Ajustes menores 
+	
+	Sin ChanServ     		❌ No 			Depende 			        ❌ No compatible 
 
 > Nota: Funciones básicas (crear, asignar, cerrar tickets) funcionan en cualquier servidor,
 pero los kicks y bans automáticos requieren ChanServ.
