@@ -44,9 +44,14 @@ pero los kicks y bans automáticos requieren ChanServ.
 ─────────────────────────
 💡 BENEFICIOS
 ─────────────────────────
+
 ✅ Mejora eficiencia y tiempos de respuesta
+
 ✅ Mantiene historial completo de tickets
+
 ✅ Sistema profesional, ligero y personalizable
 
 📧 Contacto: r.ritmo.latinos@gmail.com
+✈️Telegram: @HumanityCompLTDA
+🟢+57 312 26 22 212
 🌐 Web: www.ritmolatinoscrc.com
