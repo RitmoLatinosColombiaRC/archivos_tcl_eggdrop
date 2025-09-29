@@ -2,7 +2,7 @@
 #        🎟️ Sistema de Tickets – Ritmo Latinos Colombia      #
 #------------------------------------------------------------#
 # Autor: Atómico (Founder)
-# Versión: 2.0
+# Versión: 1.0
 # Email: r.ritmo.latinos@gmail.com
 # Servidor IRC: irc.chatdetodos.com
 # Web: www.ritmolatinoscrc.com
@@ -847,4 +847,5 @@ proc show_system_info {nick uhost hand chan text} {
 
 # Inicialización del bot
 putlog "ℹ️ Sistema de Tickets iniciado correctamente"
+
 show_bot_info
