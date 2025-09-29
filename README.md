@@ -19,6 +19,7 @@ profesional, ligero y totalmente integrado con Eggdrop.
 ─────────────────────────
 🌐 COMPATIBILIDAD DE SERVIDORES
 ─────────────────────────
+
 UnrealIRCd      ✅ ChanServ ✅ Prefijos estándar → ✅ 100% Funciona
 Hybrid          ✅ ChanServ ✅ Prefijos estándar → ✅ 100% Funciona
 Bahamut         ✅ ChanServ ✅ Prefijos estándar → ✅ 100% Funciona
