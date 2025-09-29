@@ -9,11 +9,17 @@ profesional, ligero y totalmente integrado con Eggdrop.
 ─────────────────────────
 
 📝 Crear tickets:        !ticket <mensaje>
+
 👥 Gestión de operadores: !ayuda <ID|nick>
+
 ✅ Cerrar tickets:       !fin <ID|nick>
+
 ⏱️ Avisos automáticos, escalado y cierre
+
 ⚠️ Control antiflood y límite diario
+
 📊 Estadísticas y logs completos
+
 🔧 Integración total con Eggdrop y ChanServ
 
 ─────────────────────────
