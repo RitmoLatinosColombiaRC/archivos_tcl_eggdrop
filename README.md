@@ -55,7 +55,7 @@ pero los kicks y bans automáticos requieren ChanServ.
 💡 LICENCIA PREMIUM 
 ─────────────────────────
 
-Precio licencia $5 USD por 1 año.
+💲Precio licencia $5 USD por 1 año.
 
 Soporte vigente por la compra y tiene derecho a actualizaciones futuras del codigo fuente.
 
