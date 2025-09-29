@@ -7,6 +7,7 @@ profesional, ligero y totalmente integrado con Eggdrop.
 ─────────────────────────
 🚀 CARACTERÍSTICAS
 ─────────────────────────
+
 📝 Crear tickets:        !ticket <mensaje>
 👥 Gestión de operadores: !ayuda <ID|nick>
 ✅ Cerrar tickets:       !fin <ID|nick>
