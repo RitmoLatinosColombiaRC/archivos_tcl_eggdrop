@@ -53,7 +53,7 @@
 # 🎟️ Advertencia
 # =========================================================
 #Este script esta encriptado con 4 capas de seguridad,- 
-#si intentas modificar el codigo sea de licencia o el sistema de ticket este dejara de funcionar-
+#si intentas modificar el codigo sea de licencia o el sistema de ticket este dejara de funcionar,-
 #esto puede ocasionar que la licencia se reboque o tu bot quede fuera de línea.
 #Si necesitas modificar el codigo para implementar algúna otra funcion,-
 #comúnicate con nosotros enviandonos la informacion detallada y asi podremos brindarte una solucion precisa.
@@ -857,6 +857,7 @@ proc show_system_info {nick uhost hand chan text} {
 putlog "ℹ️ Sistema de Tickets iniciado correctamente"
 
 show_bot_info
+
 
 
 
