@@ -1,5 +1,6 @@
 
   🎟️ GESTOR DE TICKETS IRC – EGGDROP 🎟️ 
+  
 💻 Optimiza tu soporte en IRC con un sistema de tickets
 profesional, ligero y totalmente integrado con Eggdrop.
 
