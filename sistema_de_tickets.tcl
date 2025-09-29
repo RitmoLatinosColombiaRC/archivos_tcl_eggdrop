@@ -50,7 +50,7 @@
 #
 #------------------------------------------------------------#
 # =========================================================
-# 🎟️ Verificación de Licencia – Ritmo Latinos Colombia
+# 🎟️ Verificación de Licencia
 # =========================================================
 
 package require json
@@ -200,8 +200,8 @@ validate_license
 set tickets_file "tickets.txt"
 set ticketslog_file "tickets.log"
 
-set support_channel "#ritmolatinos_help"
-set ops_channel     "#ritmolatinos_ad"
+set support_channel "" ;#Canal de ayuda. ->Aquí debes poner el canal de ayuda ejemplo #Opers_help o el canal que tengas de ayuda.
+set ops_channel     "" ;#Canal administrador. ->Aquí debe poner el canal de operadores o en su efecto el canal administrador.
 
 array set ticket_timers {
     warn       600
@@ -849,3 +849,4 @@ proc show_system_info {nick uhost hand chan text} {
 putlog "ℹ️ Sistema de Tickets iniciado correctamente"
 
 show_bot_info
+
