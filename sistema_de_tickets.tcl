@@ -599,6 +599,9 @@ proc check_tickets {} {
     set now [clock seconds]
     set lines [split [read_file_safe $tickets_file] "\n"]
     set cleaned {}
+    
+    # Array temporal para controlar notificaciones por usuario
+    array set notified_users {}
 
     foreach line $lines {
         if {$line eq ""} continue
@@ -629,8 +632,34 @@ proc check_tickets {} {
         }
 
         if {$age >= $ticket_timers(warn) && ($tasign eq "-" || $tasign eq "")} {
-            putserv "NOTICE $nick :⏳ Tu solicitud sigue pendiente. Aún no hay operador que te atienda."
-            putserv "PRIVMSG $ops_channel :ℹ️ Ticket de $nick lleva 10 minutos sin respuesta."
+            # Verificar si ya notificamos a este usuario en esta ejecución
+            if {![info exists notified_users($nick)]} {
+                # Contar tickets pendientes del usuario
+                set user_pending_tickets 0
+                foreach check_line $lines {
+                    if {$check_line eq ""} continue
+                    set check_parts [split $check_line ";"]
+                    if {[llength $check_parts] >= 5} {
+                        set check_nick [lindex $check_parts 1]
+                        set check_tasign [lindex $check_parts 4]
+                        if {$check_nick eq $nick && ($check_tasign eq "-" || $check_tasign eq "")} {
+                            incr user_pending_tickets
+                        }
+                    }
+                }
+                
+                # Mensaje personalizado según cantidad de tickets
+                if {$user_pending_tickets == 1} {
+                    putserv "NOTICE $nick :⏳ Tu solicitud sigue pendiente. Un operador te atenderá pronto."
+                } else {
+                    putserv "NOTICE $nick :⏳ Tienes $user_pending_tickets solicitudes pendientes. Serás atendido en orden de llegada."
+                }
+                
+                putserv "PRIVMSG $ops_channel :ℹ️ $nick tiene $user_pending_tickets ticket(s) pendiente(s)."
+                
+                # Marcar como notificado en esta ejecución
+                set notified_users($nick) 1
+            }
         }
 
         lappend cleaned $line
@@ -639,8 +668,6 @@ proc check_tickets {} {
     write_file $tickets_file [join $cleaned "\n"]
     utimer 300 check_tickets
 }
-
-utimer 10 check_tickets
 
 # Autoeliminar tickets si usuario no vuelve
 bind part - * user:left
@@ -856,6 +883,7 @@ proc show_system_info {nick uhost hand chan text} {
 putlog "ℹ️ Sistema de Tickets iniciado correctamente"
 
 show_bot_info
+
 
 
 
