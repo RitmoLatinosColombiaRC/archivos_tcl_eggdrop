@@ -580,11 +580,11 @@ proc close_ticket {nick uhost hand chan text} {
             # Cerrado por ID - solo quitar voice y log
             putlog "Ticket $text cerrado por $nick"
         } else {
-            # Cerrado por nick - aplicar kick temporal
-            putserv "KICK $support_channel $user_to_kick :✅ Tickets cerrados. Gracias por visitarnos."
+             # Cerrado por nick - aplicar BAN + KICK
             set host_mask "*!*@[lindex [split $user_host @] 1]"
-            putserv "/cs akick $support_channel add $host_mask 24h:Límite de tickets excedido"
-            utimer $ticket_ban_time [list putserv "/cs akick $support_channel del $host_mask"]
+            putserv "MODE $support_channel +b $host_mask"
+            putserv "KICK $support_channel $user_to_kick :✅ Soporte terminado. Todos tus tickets han sido cerrados, gracias por visitarnos."
+            utimer $ticket_ban_time [list putserv ".MODE $support_channel -b $host_mask"]
         }
     }
 
@@ -856,6 +856,7 @@ proc show_system_info {nick uhost hand chan text} {
 putlog "ℹ️ Sistema de Tickets iniciado correctamente"
 
 show_bot_info
+
 
 
 
