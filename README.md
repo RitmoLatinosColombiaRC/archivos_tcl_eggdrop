@@ -21,9 +21,13 @@ profesional, ligero y totalmente integrado con Eggdrop.
 ─────────────────────────
 
 UnrealIRCd      ✅ ChanServ ✅ Prefijos estándar → ✅ 100% Funciona
+
 Hybrid          ✅ ChanServ ✅ Prefijos estándar → ✅ 100% Funciona
+
 Bahamut         ✅ ChanServ ✅ Prefijos estándar → ✅ 100% Funciona
+
 InspIRCd        ✅ ChanServ ⚠️ Prefijos pueden variar → ⚠️ Ajustes menores
+
 Sin ChanServ    ❌ No compatible → ❌ Funciones de kick/baneo automáticas no operan
 
 > Nota: Funciones básicas (crear, asignar, cerrar tickets) funcionan en cualquier servidor,
