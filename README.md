@@ -20,7 +20,7 @@ profesional, ligero y totalmente integrado con Eggdrop.
 🌐 COMPATIBILIDAD DE SERVIDORES
 ─────────────────────────
 
-	Servidor IRC				ChanServ 	Prefijos (o,h,a,q,v) 	Compatibilidad 
+	Servidor IRC			ChanServ 	Prefijos (o,h,a,q,v) 		Compatibilidad 
 
 	UnrealIRCd 				✅ Sí 			✅ Sí 				        ✅ 100% 
 	
