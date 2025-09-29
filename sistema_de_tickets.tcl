@@ -14,7 +14,7 @@
 # controlar límite de solicitudes, manejo antiflood y cierre automático.
 #
 # ⚙️ Instalación:
-# 1. Copiar este archivo en la carpeta de scripts del Eggdrop.
+# 1. Copiar estos archivos en la carpeta de scripts del Eggdrop.
 # 2. Editar el archivo de configuración (eggdrop.conf) y añadir:
 #       source scripts/tickets.tcl
 #2.1.Archivo de licencia:
@@ -849,6 +849,7 @@ proc show_system_info {nick uhost hand chan text} {
 putlog "ℹ️ Sistema de Tickets iniciado correctamente"
 
 show_bot_info
+
 
 
 
