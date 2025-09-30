@@ -8,6 +8,10 @@
 # 📌 Descripción:
 # Servicio de ayuda y gestión de tickets para usuarios y operadores.
 # REQUIERE validación de licencia previa.
+# ADVERTENCIA: Este script se encuentra protegido por 4 capas de seguridad,-
+# - por lo tanto no intenten modificar el codigo o este dejara de funcionar.
+# Por otro lado la licencia puede ser rebocada si el sistema de licencia detecta
+# cualquier intento de modificacion o pirateo del mismo.
 #------------------------------------------------------------#
 
 # Verificar que la licencia fue validada antes de continuar
@@ -1103,4 +1107,5 @@ show_bot_info
 # En la parte final del script, después de show_bot_info:
 cleanup_old_history
 putlog "✅ Sistema de historial y estadísticas inicializado"
+
 
