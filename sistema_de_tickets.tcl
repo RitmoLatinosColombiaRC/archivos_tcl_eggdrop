@@ -212,9 +212,9 @@ set support_channel "" ;#Canal de ayuda. -> Aquí debes poner el canal de ayuda 
 set ops_channel     "" ;#Canal administrador. -> Aquí debe poner el canal de operadores o en su efecto el canal administrador.
 
 array set ticket_timers {
-    warn       600
-    escalate   1800
-    autoclose  3600
+    warn       300
+    escalate   600
+    autoclose  1800
 }
 
 set cleanup_interval 300
@@ -628,7 +628,7 @@ proc check_tickets {} {
         }
 
         if {$age >= $ticket_timers(escalate) && ($tasign eq "-" || $tasign eq "")} {
-            putserv "PRIVMSG $ops_channel :🚨 Atención: el ticket de $nick lleva 30 minutos pendiente."
+            putserv "PRIVMSG $ops_channel :🚨 Atención: el ticket de $nick lleva 10 minutos pendiente."
         }
 
         if {$age >= $ticket_timers(warn) && ($tasign eq "-" || $tasign eq "")} {
@@ -668,6 +668,9 @@ proc check_tickets {} {
     write_file $tickets_file [join $cleaned "\n"]
     utimer 300 check_tickets
 }
+
+utimer 10 check_tickets
+
 
 # Autoeliminar tickets si usuario no vuelve
 bind part - * user:left
@@ -883,6 +886,7 @@ proc show_system_info {nick uhost hand chan text} {
 putlog "ℹ️ Sistema de Tickets iniciado correctamente"
 
 show_bot_info
+
 
 
 
