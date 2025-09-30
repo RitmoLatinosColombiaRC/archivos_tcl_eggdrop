@@ -123,7 +123,7 @@ proc validate_license {} {
 
     puts "📧 Email: $email"
     puts "🔑 Key: [string range $key 0 15]..."
-    puts "ℹ️ BotID: $botid"
+    puts "🤖 BotID: $botid"
     puts ""
 
     # Verificar formato de la key
@@ -596,20 +596,34 @@ proc close_ticket {nick uhost hand chan text} {
     }
 }
 
-# Revisión automática de tickets - VERSIÓN MEJORADA
+# Revisión automática de tickets - VERSIÓN OPTIMIZADA
 proc check_tickets {} {
     global tickets_file ticket_timers ops_channel
-    set now [clock seconds]
-    set lines [split [read_file_safe $tickets_file] "\n"]
-    set cleaned {}
     
-    # Array temporal para controlar notificaciones por usuario
-    array set notified_users {}
+    # Verificar rápidamente si hay tickets antes de procesar
+    if {![file exists $tickets_file]} {
+        timer 30 check_tickets
+        return
+    }
+    
+    set data [read_file_safe $tickets_file]
+    if {$data eq "" || [string trim $data] eq ""} {
+        timer 30 check_tickets
+        return
+    }
+    
+    set now [clock seconds]
+    set lines [split $data "\n"]
+    set cleaned {}
+    set has_work 0
 
     foreach line $lines {
         if {$line eq ""} continue
         set parts [split $line ";"]
-        if {[llength $parts] < 5} { continue }
+        if {[llength $parts] < 5} { 
+            lappend cleaned $line
+            continue 
+        }
         
         set t_id [lindex $parts 0]
         set nick [lindex $parts 1]
@@ -617,11 +631,13 @@ proc check_tickets {} {
         set timestamp [lindex $parts 0]
         set tasign [lindex $parts 4]
 
-        if {[string is integer -strict $timestamp]} {
-            set age [expr {$now - $timestamp}]
-        } else { 
-            set age 0 
+        if {![string is integer -strict $timestamp]} {
+            lappend cleaned $line
+            continue
         }
+        
+        set age [expr {$now - $timestamp}]
+        set has_work 1
 
         if {$age >= $ticket_timers(autoclose)} {
             putserv "NOTICE $nick :❌ Tu ticket ha sido cerrado automáticamente porque no fue atendido."
@@ -631,48 +647,27 @@ proc check_tickets {} {
         }
 
         if {$age >= $ticket_timers(escalate) && ($tasign eq "-" || $tasign eq "")} {
-            putserv "PRIVMSG $ops_channel :ℹ Atención: Ticket #$t_id de $nick lleva 10 minutos pendiente. → $detalle"
+            putserv "PRIVMSG $ops_channel :🚨 Atención: Ticket #$t_id de $nick lleva 10 minutos pendiente. → $detalle"
         }
 
         if {$age >= $ticket_timers(warn) && ($tasign eq "-" || $tasign eq "")} {
-            # Verificar si ya notificamos a este usuario en esta ejecución
-            if {![info exists notified_users($nick)]} {
-                # Contar tickets pendientes del usuario
-                set user_pending_tickets 0
-                foreach check_line $lines {
-                    if {$check_line eq ""} continue
-                    set check_parts [split $check_line ";"]
-                    if {[llength $check_parts] >= 5} {
-                        set check_nick [lindex $check_parts 1]
-                        set check_tasign [lindex $check_parts 4]
-                        if {$check_nick eq $nick && ($check_tasign eq "-" || $check_tasign eq "")} {
-                            incr user_pending_tickets
-                        }
-                    }
-                }
-                
-                # Mensaje personalizado según cantidad de tickets
-                if {$user_pending_tickets == 1} {
-                    putserv "NOTICE $nick :⏳ Tu solicitud sigue pendiente. Un operador te atenderá pronto."
-                } else {
-                    putserv "NOTICE $nick :⏳ Tienes $user_pending_tickets solicitudes pendientes. Serás atendido en orden de llegada."
-                }
-                
-                putserv "PRIVMSG $ops_channel :ℹ $nick tiene $user_pending_tickets ticket(s) pendiente(s). Usa !tickets para ver la lista."
-                
-                # Marcar como notificado en esta ejecución
-                set notified_users($nick) 1
-            }
+            putserv "NOTICE $nick :⏳ Tu solicitud sigue pendiente. Un operador te atenderá pronto."
+            putserv "PRIVMSG $ops_channel :ℹ️ Ticket de $nick lleva 5 minutos sin respuesta."
         }
 
         lappend cleaned $line
     }
 
-    write_file $tickets_file [join $cleaned "\n"]
-    utimer 300 check_tickets
+    if {$has_work} {
+        write_file $tickets_file [join $cleaned "\n"]
+    }
+    
+    # Programar siguiente ejecución con intervalo más largo
+    timer 30 check_tickets
 }
 
-utimer 10 check_tickets
+# Iniciar con intervalo más largo
+timer 30 check_tickets
 
 # Autoeliminar tickets si usuario no vuelve
 bind part - * user:left
@@ -891,6 +886,7 @@ puts "Script: [file tail [info script]]"
 puts "Hora: [clock format [clock seconds]]"
 puts "=============================================="
 show_bot_info
+
 
 
 
