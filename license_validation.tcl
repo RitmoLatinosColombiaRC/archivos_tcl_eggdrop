@@ -202,4 +202,5 @@ if {![license::verify_tickets_script_integrity]} {
 puts "=============================================="
 puts "✅ Validación de licencia COMPLETADA"
 puts "✅ Scripts verificados y listos para cargar"
+puts "✅ Version de licencia 1.0"
 puts "=============================================="
