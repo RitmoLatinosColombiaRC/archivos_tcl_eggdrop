@@ -123,7 +123,7 @@ proc validate_license {} {
 
     puts "📧 Email: $email"
     puts "🔑 Key: [string range $key 0 15]..."
-    puts "🤖 BotID: $botid"
+    puts "ℹ️ BotID: $botid"
     puts ""
 
     # Verificar formato de la key
@@ -891,6 +891,7 @@ puts "Script: [file tail [info script]]"
 puts "Hora: [clock format [clock seconds]]"
 puts "=============================================="
 show_bot_info
+
 
 
 
