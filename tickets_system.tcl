@@ -6,8 +6,8 @@
 # Email: r.ritmo.latinos@gmail.com
 #
 # 📌 Descripción:
-# Servicio de ayuda y gestión de tickets para usuarios y operadores
-# REQUIERE validación de licencia previa
+# Servicio de ayuda y gestión de tickets para usuarios y operadores.
+# REQUIERE validación de licencia previa.
 #------------------------------------------------------------#
 
 # Verificar que la licencia fue validada antes de continuar
@@ -1103,3 +1103,4 @@ show_bot_info
 # En la parte final del script, después de show_bot_info:
 cleanup_old_history
 putlog "✅ Sistema de historial y estadísticas inicializado"
+
