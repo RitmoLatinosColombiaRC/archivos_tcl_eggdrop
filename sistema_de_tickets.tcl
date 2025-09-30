@@ -593,7 +593,7 @@ proc close_ticket {nick uhost hand chan text} {
     }
 }
 
-# Revisión automática de tickets
+# Revisión automática de tickets - VERSIÓN MEJORADA
 proc check_tickets {} {
     global tickets_file ticket_timers ops_channel
     set now [clock seconds]
@@ -622,13 +622,13 @@ proc check_tickets {} {
 
         if {$age >= $ticket_timers(autoclose)} {
             putserv "NOTICE $nick :❌ Tu ticket ha sido cerrado automáticamente porque no fue atendido."
-            putserv "PRIVMSG $ops_channel :❌ Ticket de $nick cerrado automáticamente (sin respuesta)."
+            putserv "PRIVMSG $ops_channel :❌ Ticket #$t_id de $nick cerrado automáticamente (sin respuesta)."
             putlog "❌ Ticket $t_id de $nick cerrado automáticamente."
             continue
         }
 
         if {$age >= $ticket_timers(escalate) && ($tasign eq "-" || $tasign eq "")} {
-            putserv "PRIVMSG $ops_channel :🚨 Atención: el ticket de $nick lleva 10 minutos pendiente."
+            putserv "PRIVMSG $ops_channel :🚨 Atención: Ticket #$t_id de $nick lleva 10 minutos pendiente. → $detalle"
         }
 
         if {$age >= $ticket_timers(warn) && ($tasign eq "-" || $tasign eq "")} {
@@ -655,7 +655,7 @@ proc check_tickets {} {
                     putserv "NOTICE $nick :⏳ Tienes $user_pending_tickets solicitudes pendientes. Serás atendido en orden de llegada."
                 }
                 
-                putserv "PRIVMSG $ops_channel :ℹ️ $nick tiene $user_pending_tickets ticket(s) pendiente(s)."
+                putserv "PRIVMSG $ops_channel :ℹ️ $nick tiene $user_pending_tickets ticket(s) pendiente(s). Usa !tickets para ver la lista."
                 
                 # Marcar como notificado en esta ejecución
                 set notified_users($nick) 1
@@ -670,7 +670,6 @@ proc check_tickets {} {
 }
 
 utimer 10 check_tickets
-
 
 # Autoeliminar tickets si usuario no vuelve
 bind part - * user:left
@@ -886,6 +885,7 @@ proc show_system_info {nick uhost hand chan text} {
 putlog "ℹ️ Sistema de Tickets iniciado correctamente"
 
 show_bot_info
+
 
 
 
