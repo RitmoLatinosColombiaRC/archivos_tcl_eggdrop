@@ -631,7 +631,7 @@ proc check_tickets {} {
         }
 
         if {$age >= $ticket_timers(escalate) && ($tasign eq "-" || $tasign eq "")} {
-            putserv "PRIVMSG $ops_channel :🚨 Atención: Ticket #$t_id de $nick lleva 10 minutos pendiente. → $detalle"
+            putserv "PRIVMSG $ops_channel :ℹ Atención: Ticket #$t_id de $nick lleva 10 minutos pendiente. → $detalle"
         }
 
         if {$age >= $ticket_timers(warn) && ($tasign eq "-" || $tasign eq "")} {
@@ -658,7 +658,7 @@ proc check_tickets {} {
                     putserv "NOTICE $nick :⏳ Tienes $user_pending_tickets solicitudes pendientes. Serás atendido en orden de llegada."
                 }
                 
-                putserv "PRIVMSG $ops_channel :ℹ️ $nick tiene $user_pending_tickets ticket(s) pendiente(s). Usa !tickets para ver la lista."
+                putserv "PRIVMSG $ops_channel :ℹ $nick tiene $user_pending_tickets ticket(s) pendiente(s). Usa !tickets para ver la lista."
                 
                 # Marcar como notificado en esta ejecución
                 set notified_users($nick) 1
@@ -891,6 +891,7 @@ puts "Script: [file tail [info script]]"
 puts "Hora: [clock format [clock seconds]]"
 puts "=============================================="
 show_bot_info
+
 
 
 
