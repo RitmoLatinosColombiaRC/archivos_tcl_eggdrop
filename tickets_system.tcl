@@ -25,18 +25,7 @@ if {![info exists license::validation_passed] || !$license::validation_passed} {
 ### =======================
 set tickets_file "tickets.txt"
 set ticketslog_file "tickets.log"
-set tickets_history "tickets_history.txt"  ;# Nuevo archivo para historial
-set stats_file "tickets_stats.txt"         ;# Archivo para estadísticas diarias
 
-### =======================
-### CONFIGURACIÓN DE ESTADÍSTICAS
-### =======================
-set keep_history_days 7    ;# Mantener historial por 7 días
-set enable_daily_stats 1   ;# Activar estadísticas diarias
-
-### =======================
-### CONFIGURACIÓN DE CANALES
-### =======================
 set support_channel "#ritmolatinos_help"
 set ops_channel     "#ritmolatinos_ad"
 
@@ -50,6 +39,9 @@ set ticket_ban_time 300
 set max_daily_tickets 5
 set max_ticket_wait 600
 set akick_time 86400
+
+# Array para tracking de reconexiones
+array set pending_reconnects {}
 
 ### =======================
 ### UTILIDADES
@@ -81,181 +73,6 @@ proc read_file_safe {filename} {
         return ""
     }
     return [read_file $filename]
-}
-
-### =======================
-### PROCEDIMIENTOS DE HISTORIAL Y ESTADÍSTICAS
-### =======================
-
-# Guardar ticket en archivo de historial
-proc save_ticket_to_history {history_entry} {
-    global tickets_history
-    
-    set fp [open $tickets_history a]
-    puts $fp $history_entry
-    close $fp
-}
-
-# Actualizar estadísticas diarias
-proc update_daily_stats {closed_tickets closed_by} {
-    global stats_file
-    
-    set today [clock format [clock seconds] -format "%Y-%m-%d"]
-    set stats_data [read_file_safe $stats_file]
-    
-    # Buscar estadísticas del día actual
-    set found 0
-    set new_stats {}
-    foreach line [split $stats_data "\n"] {
-        if {$line eq ""} continue
-        set parts [split $line ";"]
-        if {[lindex $parts 0] eq $today} {
-            # Actualizar estadísticas existentes
-            set tickets_count [expr {[lindex $parts 1] + [llength $closed_tickets]}]
-            set closers [lindex $parts 2]
-            
-            # Actualizar contador por operador
-            if {[dict exists $closers $closed_by]} {
-                dict set closers $closed_by [expr {[dict get $closers $closed_by] + [llength $closed_tickets]}]
-            } else {
-                dict set closers $closed_by [llength $closed_tickets]
-            }
-            
-            set new_line "$today;$tickets_count;$closers"
-            lappend new_stats $new_line
-            set found 1
-        } else {
-            lappend new_stats $line
-        }
-    }
-    
-    # Si no existe, crear nueva entrada
-    if {!$found} {
-        set closers [dict create $closed_by [llength $closed_tickets]]
-        set new_line "$today;[llength $closed_tickets];$closers"
-        lappend new_stats $new_line
-    }
-    
-    write_file $stats_file [join $new_stats "\n"]
-}
-
-# Limpiar historial antiguo automáticamente
-proc cleanup_old_history {} {
-    global tickets_history keep_history_days
-    
-    if {![file exists $tickets_history]} { return }
-    
-    set cutoff_time [expr {[clock seconds] - ($keep_history_days * 86400)}]
-    set data [read_file_safe $tickets_history]
-    set cleaned {}
-    
-    foreach line [split $data "\n"] {
-        if {$line eq ""} continue
-        set parts [split $line ";"]
-        if {[llength $parts] >= 7} {
-            set close_time [lindex $parts 6]
-            if {$close_time >= $cutoff_time} {
-                lappend cleaned $line
-            }
-        }
-    }
-    
-    write_file $tickets_history [join $cleaned "\n"]
-    putlog "✅ Historial limpiado: se conservan últimos $keep_history_days días"
-}
-
-# Obtener estadísticas del historial Y tickets pendientes
-proc get_complete_stats {days} {
-    global tickets_history tickets_file
-    
-    # Inicializar contadores
-    set total_tickets 0
-    set assigned_tickets 0
-    set pending_tickets 0
-    array set operators {}
-    array set users {}
-    array set daily_stats {}
-    array set pending_users {}
-    
-    # PROCESAR TICKETS PENDIENTES (activos)
-    if {[file exists $tickets_file]} {
-        set active_data [read_file_safe $tickets_file]
-        foreach line [split $active_data "\n"] {
-            if {$line eq ""} continue
-            set parts [split $line ";"]
-            if {[llength $parts] < 5} continue
-            
-            incr total_tickets
-            incr pending_tickets
-            
-            set user_nick [lindex $parts 1]
-            set operador [lindex $parts 4]
-            
-            # Contar usuarios con tickets pendientes
-            if {[info exists pending_users($user_nick)]} {
-                incr pending_users($user_nick)
-            } else {
-                set pending_users($user_nick) 1
-            }
-            
-            # Contar por usuario en general
-            if {[info exists users($user_nick)]} {
-                incr users($user_nick)
-            } else {
-                set users($user_nick) 1
-            }
-        }
-    }
-    
-    # PROCESAR HISTORIAL (tickets cerrados)
-    if {[file exists $tickets_history]} {
-        set cutoff_time [expr {[clock seconds] - ($days * 86400)}]
-        set history_data [read_file_safe $tickets_history]
-        
-        foreach line [split $history_data "\n"] {
-            if {$line eq ""} continue
-            set parts [split $line ";"]
-            if {[llength $parts] < 7} continue
-            
-            set close_time [lindex $parts 6]
-            if {$close_time < $cutoff_time} continue
-            
-            incr total_tickets
-            
-            set user_nick [lindex $parts 1]
-            set operador [lindex $parts 4]
-            set closer [lindex $parts 5]
-            set date [clock format $close_time -format "%Y-%m-%d"]
-            
-            # Contar por usuario
-            if {[info exists users($user_nick)]} {
-                incr users($user_nick)
-            } else {
-                set users($user_nick) 1
-            }
-            
-            # Contar por operador (si fue asignado)
-            if {$operador ne "-" && $operador ne ""} {
-                incr assigned_tickets
-                if {[info exists operators($operador)]} {
-                    incr operators($operador)
-                } else {
-                    set operators($operador) 1
-                }
-            }
-            
-            # Estadísticas por día
-            if {[info exists daily_stats($date)]} {
-                incr daily_stats($date)
-            } else {
-                set daily_stats($date) 1
-            }
-        }
-    }
-    
-    return [list total $total_tickets assigned $assigned_tickets pending $pending_tickets \
-                   operators [array get operators] users [array get users] \
-                   daily_stats [array get daily_stats] pending_users [array get pending_users]]
 }
 
 ### =======================
@@ -342,16 +159,159 @@ proc show_bot_info {} {
 set support_channel "#ritmolatinos_help"
 
 proc user_joined {nick uhost hand chan} {
-    global support_channel
+    global support_channel pending_reconnects ops_channel
+    
     if {$chan eq $support_channel} {
+        # Dar voice si no lo tiene
         if {![is_voiced $nick $chan]} {
             putserv "MODE $support_channel +v $nick"
-            putserv "NOTICE $nick :✅ Bienvenido a $support_channel! Ahora tienes voz para comunicarte. Usa !ticket <mensaje> para que un operador te atienda."
+        }
+        
+        # Verificar si este usuario tenía tickets en espera de reconexión
+        set reconnected_tickets {}
+        foreach {t_id waiting_nick} [array get pending_reconnects] {
+            if {[string equal -nocase $waiting_nick $nick]} {
+                lappend reconnected_tickets $t_id
+                unset pending_reconnects($t_id)
+            }
+        }
+        
+        if {[llength $reconnected_tickets] > 0} {
+            putserv "NOTICE $nick :✅ Bienvenido de vuelta! Tus tickets ([join $reconnected_tickets ,]) han sido reactivados."
+            putserv "PRIVMSG $ops_channel :✅ $nick reconectó - tickets [join $reconnected_tickets ,] reactivados."
+        } else {
+            putserv "NOTICE $nick :✅ Bienvenido a $support_channel! Usa !ticket <mensaje> para solicitar ayuda."
         }
     }
 }
 
 bind join - * user_joined
+
+### =======================
+### SISTEMA DE RECONEXIÓN
+### =======================
+proc user_left {nick uhost hand chan reason} {
+    global tickets_file support_channel max_ticket_wait ops_channel pending_reconnects
+    
+    # Verificar licencia antes de ejecutar
+    if {![license::is_validated]} {
+        return
+    }
+    
+    if {$chan ne $support_channel} { return }
+    
+    set lines [split [read_file_safe $tickets_file] "\n"]
+    set found_assigned_tickets 0
+    
+    foreach line $lines {
+        if {$line eq ""} continue
+        set parts [split $line ";"]
+        if {[llength $parts] < 5} continue
+        
+        set t_id [lindex $parts 0]
+        set tnick [lindex $parts 1]
+        set tasign [lindex $parts 4]
+        
+        if {[string equal -nocase $tnick $nick] && $tasign ne "-" && $tasign ne ""} {
+            # Solo poner en espera tickets que ESTÁN SIENDO ATENDIDOS
+            set pending_reconnects($t_id) $nick
+            putserv "PRIVMSG $ops_channel :ℹ️ Ticket $t_id de $nick en espera por desconexión. Tiene $max_ticket_wait segundos para reconectar."
+            utimer $max_ticket_wait [list check_user_reconnected $t_id $nick]
+            set found_assigned_tickets 1
+        }
+    }
+    
+    if {!$found_assigned_tickets} {
+        # Si el usuario no tenía tickets siendo atendidos, eliminar tickets no asignados
+        remove_unassigned_user_tickets $nick
+    }
+}
+
+proc check_user_reconnected {t_id nick} {
+    global pending_reconnects tickets_file ops_channel support_channel
+    
+    if {![info exists pending_reconnects($t_id)]} {
+        return  # Ya fue manejado
+    }
+    
+    # Verificar si el usuario está actualmente en el canal
+    if {[onchan $nick $support_channel]} {
+        # ¡El usuario volvió! Mantener el ticket
+        putserv "PRIVMSG $ops_channel :✅ Usuario $nick reconectó, ticket $t_id reactivado."
+        unset pending_reconnects($t_id)
+        return
+    }
+    
+    # Usuario no volvió - eliminar ticket
+    unset pending_reconnects($t_id)
+    remove_specific_ticket $t_id $nick
+}
+
+proc remove_specific_ticket {t_id nick} {
+    global tickets_file ops_channel
+    
+    set lines [split [read_file_safe $tickets_file] "\n"]
+    set cleaned {}
+    set removed 0
+    
+    foreach line $lines {
+        if {$line eq ""} continue
+        set parts [split $line ";"]
+        if {[llength $parts] < 5} {
+            lappend cleaned $line
+            continue
+        }
+        
+        set line_id [lindex $parts 0]
+        set tnick [lindex $parts 1]
+        
+        if {$line_id == $t_id && [string equal -nocase $tnick $nick]} {
+            set removed 1
+            putserv "PRIVMSG $ops_channel :❌ Ticket $t_id de $nick eliminado (no reconectó a tiempo)."
+            continue
+        }
+        lappend cleaned $line
+    }
+    
+    if {$removed} {
+        write_file $tickets_file [join $cleaned "\n"]
+    }
+}
+
+proc remove_unassigned_user_tickets {nick} {
+    global tickets_file ops_channel
+    
+    set lines [split [read_file_safe $tickets_file] "\n"]
+    set cleaned {}
+    set removed 0
+    
+    foreach line $lines {
+        if {$line eq ""} continue
+        set parts [split $line ";"]
+        if {[llength $parts] < 5} {
+            lappend cleaned $line
+            continue
+        }
+        
+        set tnick [lindex $parts 1]
+        set tasign [lindex $parts 4]
+        
+        if {[string equal -nocase $tnick $nick] && ($tasign eq "-" || $tasign eq "")} {
+            # Solo eliminar tickets NO asignados
+            set removed 1
+            continue
+        }
+        lappend cleaned $line
+    }
+    
+    if {$removed} {
+        write_file $tickets_file [join $cleaned "\n"]
+        putserv "PRIVMSG $ops_channel :ℹ️ Tickets no asignados de $nick eliminados por desconexión."
+    }
+}
+
+bind part - * user_left
+bind sign - * user_left
 
 ### =======================
 ### COMANDOS BOT
@@ -378,13 +338,24 @@ proc create_ticket {nick uhost hand chan text} {
         return 
     }
 
+    # Verificar flood
+    if {[check_flood $nick]} {
+        putserv "NOTICE $nick :🚫 Estás enviando comandos demasiado rápido."
+        return
+    }
+
     set data [read_file_safe $tickets_file]
     set count 0
     foreach line [split $data "\n"] {
         if {$line eq ""} continue
         set parts [split $line ";"]
+        if {[llength $parts] < 5} continue
         set tnick [lindex $parts 1]
-        if {$tnick eq $nick} { incr count }
+        set tasign [lindex $parts 4]
+        # Solo contar tickets activos (no cerrados) del mismo usuario
+        if {[string equal -nocase $tnick $nick] && $tasign ne "CLOSED"} {
+            incr count
+        }
     }
 
     if {$count >= $max_daily_tickets} {
@@ -499,9 +470,9 @@ proc take_ticket {opnick uhost hand chan text} {
         set detalle [lindex $parts 3]
         set tasign [lindex $parts 4]
 
-        if {$text eq $t_id || $text eq $tnick} {
+        if {$text == $t_id || [string equal -nocase $text $tnick]} {
             set found 1
-            if {$tasign ne "" && $tasign ne "-"} {
+            if {$tasign ne "-" && $tasign ne ""} {
                 putserv "PRIVMSG $ops_channel :⚠️ Ticket $t_id ya tomado por $tasign."
                 lappend cleaned $line
             } else {
@@ -521,10 +492,10 @@ proc take_ticket {opnick uhost hand chan text} {
     }
 }
 
-# Finalizar ticket (!fin) - VERSIÓN MEJORADA CON HISTORIAL
+# Finalizar ticket (!fin)
+bind pub - "!fin" close_ticket
 proc close_ticket {nick uhost hand chan text} {
     global tickets_file ops_channel support_channel ticket_ban_time
-    global tickets_history
 
     # Verificar licencia antes de ejecutar
     if {![license::is_validated]} {
@@ -543,7 +514,6 @@ proc close_ticket {nick uhost hand chan text} {
     set found 0
     set user_to_kick ""
     set user_host ""
-    set closed_tickets [list]
 
     foreach line $lines {
         if {$line eq ""} continue
@@ -559,53 +529,34 @@ proc close_ticket {nick uhost hand chan text} {
         set detalle [lindex $parts 3]
         set tasign [lindex $parts 4]
 
-        if {$text eq $t_id} {
+        if {$text == $t_id || [string equal -nocase $text $tnick]} {
             set found 1
             set user_to_kick $tnick
             set user_host $thost
             
-            # Guardar ticket en historial antes de eliminarlo
-            set history_entry "$t_id;$tnick;$thost;$detalle;$tasign;$nick;[clock seconds]"
-            save_ticket_to_history $history_entry
-            
-            lappend closed_tickets $t_id
-            putserv "PRIVMSG $ops_channel :✔ Ticket $t_id de $tnick cerrado."
-            putserv "NOTICE $tnick :✅ Tu ticket #$t_id ha sido cerrado por $nick."
-            continue
-        } elseif {$text eq $tnick} {
-            set found 1
-            set user_to_kick $tnick
-            set user_host $thost
-            
-            # Guardar ticket en historial antes de eliminarlo
-            set history_entry "$t_id;$tnick;$thost;$detalle;$tasign;$nick;[clock seconds]"
-            save_ticket_to_history $history_entry
-            
-            lappend closed_tickets $t_id
-            putserv "PRIVMSG $ops_channel :✔ Ticket $t_id de $tnick cerrado."
-            putserv "NOTICE $tnick :✅ Tu ticket #$t_id ha sido cerrado por $nick."
+            if {$text == $t_id} {
+                putserv "PRIVMSG $ops_channel :✔ Ticket $t_id de $tnick cerrado."
+                putserv "NOTICE $tnick :✅ Tu ticket #$t_id ha sido cerrado por $nick."
+            } else {
+                putserv "PRIVMSG $ops_channel :✔ Todos los tickets de $tnick cerrados por $nick."
+                putserv "NOTICE $tnick :✅ Todos tus tickets han sido cerrados por $nick."
+            }
             continue
         }
         lappend cleaned $line
     }
 
     write_file $tickets_file [join $cleaned "\n"]
-    
-    # Actualizar estadísticas después de cerrar tickets
-    if {[llength $closed_tickets] > 0} {
-        update_daily_stats $closed_tickets $nick
-    }
 
     if {$found && $user_to_kick ne ""} {
         putserv "MODE $support_channel -v $user_to_kick"
         
-        if {[string is integer -strict $text]} {
-            putlog "Ticket $text cerrado por $nick"
-        } else {
+        # Solo aplicar ban si se cierra por nick (todos los tickets)
+        if {![string is integer -strict $text]} {
             set host_mask "*!*@[lindex [split $user_host @] 1]"
             putserv "MODE $support_channel +b $host_mask"
             putserv "KICK $support_channel $user_to_kick :✅ Soporte terminado. Todos tus tickets han sido cerrados, gracias por visitarnos."
-            utimer $ticket_ban_time [list putserv ".MODE $support_channel -b $host_mask"]
+            utimer $ticket_ban_time [list putserv "MODE $support_channel -b $host_mask"]
         }
     }
 
@@ -614,15 +565,14 @@ proc close_ticket {nick uhost hand chan text} {
     }
 }
 
-bind pub - "!fin" close_ticket
-
 # Revisión automática de tickets
 proc check_tickets {} {
     global tickets_file ticket_timers ops_channel
-	# Verificar licencia antes de ejecutar
+    # Verificar licencia antes de ejecutar
     if {![license::is_validated]} {
         return
     }
+    
     set now [clock seconds]
     set lines [split [read_file_safe $tickets_file] "\n"]
     set cleaned {}
@@ -643,87 +593,30 @@ proc check_tickets {} {
             set age 0 
         }
 
-        if {$age >= $ticket_timers(autoclose)} {
-            putserv "NOTICE $nick :❌Tu ticket ha sido cerrado automáticamente."
-            putserv "PRIVMSG $ops_channel :❌Ticket de $nick cerrado automáticamente."
-            putlog "Ticket $t_id de $nick cerrado automáticamente."
+        if {$age >= $ticket_timers(autoclose) && ($tasign eq "-" || $tasign eq "")} {
+            putserv "NOTICE $nick :❌ Tu ticket ha sido cerrado automáticamente por inactividad."
+            putserv "PRIVMSG $ops_channel :❌ Ticket $t_id de $nick cerrado automáticamente por inactividad."
+            putlog "Ticket $t_id de $nick cerrado automáticamente por inactividad."
             continue
         }
 
         if {$age >= $ticket_timers(escalate) && ($tasign eq "-" || $tasign eq "")} {
-            putserv "PRIVMSG $ops_channel :Atención: ⏳ ticket de $nick lleva 30 minutos pendiente."
+            putserv "PRIVMSG $ops_channel :🚨 Atención: ticket #$t_id de $nick lleva 30 minutos pendiente."
         }
 
         if {$age >= $ticket_timers(warn) && ($tasign eq "-" || $tasign eq "")} {
             putserv "NOTICE $nick :⏳ Tu solicitud sigue pendiente. Paciencia por favor."
-            putserv "PRIVMSG $ops_channel :⏳ Ticket #$t_id de $nick lleva 10 minutos sin respuesta."
         }
 
         lappend cleaned $line
     }
 
     write_file $tickets_file [join $cleaned "\n"]
-    utimer 300 check_tickets
 }
 
+# Iniciar el timer de revisión (solo una vez)
 utimer 300 check_tickets
-
-# Autoeliminar tickets si usuario no vuelve
-bind part - * user:left
-bind sign - * user:left
-proc user:left {nick uhost hand chan text} {
-    global tickets_file support_channel max_ticket_wait ops_channel
-    
-    # Verificar licencia antes de ejecutar
-    if {![license::is_validated]} {
-        return
-    }
-    
-    if {$chan ne $support_channel} { return }
-    
-    set lines [split [read_file_safe $tickets_file] "\n"]
-    foreach line $lines {
-        if {$line eq ""} continue
-        set parts [split $line ";"]
-        if {[llength $parts] < 5} continue
-        set t_id [lindex $parts 0]
-        set tnick [lindex $parts 1]
-        if {$tnick eq $nick} {
-            putserv "PRIVMSG $ops_channel :ℹ️ Ticket $t_id de $nick se mantiene $max_ticket_wait segundos para posible reconexión."
-            utimer $max_ticket_wait [list remove_ticket_if_not_back $t_id $nick]
-        }
-    }
-}
-
-proc remove_ticket_if_not_back {t_id nick} {
-    global tickets_file ops_channel
-    
-    # Verificar licencia antes de ejecutar
-    if {![license::is_validated]} {
-        return
-    }
-    
-    set lines [split [read_file_safe $tickets_file] "\n"]
-    set cleaned {}
-    set removed 0
-    foreach line $lines {
-        if {$line eq ""} continue
-        set parts [split $line ";"]
-        if {[llength $parts] < 5} continue
-        set line_id [lindex $parts 0]
-        set tnick [lindex $parts 1]
-        if {$line_id eq $t_id && $tnick eq $nick} {
-            incr removed
-            continue
-        }
-        lappend cleaned $line
-    }
-    if {$removed} {
-        write_file $tickets_file [join $cleaned "\n"]
-        putserv "PRIVMSG $ops_channel :ℹ️Ticket $t_id de $nick eliminado automáticamente (usuario no volvió)."
-        putlog "ℹ️Ticket $t_id de $nick eliminado automáticamente."
-    }
-}
+timer 300 check_tickets
 
 # Comando de ayuda (!help)
 bind pub - "!help" show_help
@@ -793,12 +686,12 @@ proc show_help {nick uhost hand chan text} {
     }
 }
 
-# Comando de estadísticas UNIFICADO - Incluye pendientes e historial
+# Comando de estadísticas para operadores
 bind pub - "!estadisticas" show_stats
 bind pub - "!stats" show_stats
 
 proc show_stats {nick uhost hand chan text} {
-    global ops_channel tickets_file tickets_history
+    global tickets_file ops_channel support_channel
     
     # Verificar licencia antes de ejecutar
     if {![license::is_validated]} {
@@ -806,261 +699,61 @@ proc show_stats {nick uhost hand chan text} {
         return
     }
 
-    if {$chan ne $ops_channel} { 
-        putserv "NOTICE $nick :❌ Este comando solo está disponible en $ops_channel"
-        return 
-    }
+    if {$chan ne $ops_channel} { return }
     
-    # Determinar período (por defecto 7 días)
-    set days 7
-    if {$text ne ""} {
-        if {[string is integer $text] && $text > 0 && $text <= 30} {
-            set days $text
-        } else {
-            putserv "PRIVMSG $ops_channel :⚠️ Uso: !estadisticas [días] (máximo 30 días)"
-            return
-        }
-    }
-    
-    # INICIALIZAR CONTADORES
-    set total_historicos 0
-    set total_pendientes 0
-    set total_general 0
-    set atendidos_historicos 0
+    set data [read_file_safe $tickets_file]
+    set total_tickets 0
+    set pending_tickets 0
+    set assigned_tickets 0
     array set operators {}
-    array set users_historicos {}
-    array set users_pendientes {}
-    array set daily_stats {}
     
-    # 1. PROCESAR TICKETS PENDIENTES (activos)
-    set pendientes_lista [list]
-    if {[file exists $tickets_file]} {
-        set active_data [read_file_safe $tickets_file]
-        foreach line [split $active_data "\n"] {
-            if {$line eq ""} continue
-            set parts [split $line ";"]
-            if {[llength $parts] < 5} continue
-            
-            incr total_pendientes
-            incr total_general
-            
-            set t_id [lindex $parts 0]
-            set user_nick [lindex $parts 1]
-            set detalle [lindex $parts 3]
-            set operador [lindex $parts 4]
-            
-            # Guardar info para mostrar después
-            lappend pendientes_lista [list $t_id $user_nick $detalle $operador]
-            
-            # Contar usuarios con tickets pendientes
-            if {[info exists users_pendientes($user_nick)]} {
-                incr users_pendientes($user_nick)
-            } else {
-                set users_pendientes($user_nick) 1
-            }
-        }
-    }
-    
-    # 2. PROCESAR HISTORIAL (tickets cerrados)
-    if {[file exists $tickets_history]} {
-        set cutoff_time [expr {[clock seconds] - ($days * 86400)}]
-        set history_data [read_file_safe $tickets_history]
+    foreach line [split $data "\n"] {
+        if {$line eq ""} continue
+        set parts [split $line ";"]
+        if {[llength $parts] < 5} continue
         
-        foreach line [split $history_data "\n"] {
-            if {$line eq ""} continue
-            set parts [split $line ";"]
-            if {[llength $parts] < 7} continue
-            
-            set close_time [lindex $parts 6]
-            if {$close_time < $cutoff_time} continue
-            
-            incr total_historicos
-            incr total_general
-            
-            set user_nick [lindex $parts 1]
-            set operador [lindex $parts 4]
-            set date [clock format $close_time -format "%Y-%m-%d"]
-            
-            # Contar por usuario en histórico
-            if {[info exists users_historicos($user_nick)]} {
-                incr users_historicos($user_nick)
-            } else {
-                set users_historicos($user_nick) 1
-            }
-            
-            # Contar por operador (si fue asignado)
-            if {$operador ne "-" && $operador ne ""} {
-                incr atendidos_historicos
-                if {[info exists operators($operador)]} {
-                    incr operators($operador)
-                } else {
-                    set operators($operador) 1
-                }
-            }
-            
-            # Estadísticas por día
-            if {[info exists daily_stats($date)]} {
-                incr daily_stats($date)
-            } else {
-                set daily_stats($date) 1
-            }
-        }
-    }
-    
-    # CALCULAR PORCENTAJES
-    if {$total_general > 0} {
-        set porcentaje_atendidos [expr {double($atendidos_historicos) * 100.0 / $total_general}]
-        set porcentaje_pendientes [expr {double($total_pendientes) * 100.0 / $total_general}]
-        set porcentaje_atendidos_formateado [format "%.1f" $porcentaje_atendidos]
-        set porcentaje_pendientes_formateado [format "%.1f" $porcentaje_pendientes]
-    } else {
-        set porcentaje_atendidos_formateado "0.0"
-        set porcentaje_pendientes_formateado "0.0"
-    }
-    
-    # MOSTRAR ESTADÍSTICAS UNIFICADAS
-    putserv "PRIVMSG $ops_channel :  1 **ESTADÍSTICAS COMPLETAS - ÚLTIMOS $days DÍAS**  "
-    putserv "PRIVMSG $ops_channel : ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    
-    # RESUMEN GENERAL UNIFICADO
-    putserv "PRIVMSG $ops_channel :  1 **RESUMEN GENERAL:** "
-    putserv "PRIVMSG $ops_channel :    1 Total general:3 $total_general tickets"
-    putserv "PRIVMSG $ops_channel :    ✅ Atendidos: $atendidos_historicos ($porcentaje_atendidos_formateado%)"
-    putserv "PRIVMSG $ops_channel :    ⏳ Pendientes: $total_pendientes ($porcentaje_pendientes_formateado%)"
-    putserv "PRIVMSG $ops_channel :    ⏳ Históricos: $total_historicos tickets"
-    
-    # TICKETS PENDIENTES ACTUALES (si hay)
-    if {$total_pendientes > 0} {
-        putserv "PRIVMSG $ops_channel : "
-        putserv "PRIVMSG $ops_channel : 1 **TICKETS PENDIENTES ACTUALES:**"
+        incr total_tickets
+        set asignado [lindex $parts 4]
         
-        set count 0
-        set sin_asignar 0
-        foreach ticket $pendientes_lista {
-            set t_id [lindex $ticket 0]
-            set tnick [lindex $ticket 1]
-            set detalle [lindex $ticket 2]
-            set tasign [lindex $ticket 3]
-            
-            incr count
-            if {$tasign eq "-"} { incr sin_asignar }
-            
-            set tiempo_creado [clock format $t_id -format "%H:%M"]
-            set estado [expr {$tasign eq "-" ? " SIN ASIGNAR" : " $tasign"}]
-            
-            # Acortar detalles muy largos
-            if {[string length $detalle] > 35} {
-                set detalle "[string range $detalle 0 32]..."
-            }
-            
-            putserv "PRIVMSG $ops_channel :    $count. #$t_id - $tnick ($tiempo_creado)"
-            putserv "PRIVMSG $ops_channel :    $detalle"
-            putserv "PRIVMSG $ops_channel :  ⏳$estado"
-            
-            if {$count >= 3} {
-                set remaining [expr {$total_pendientes - 3}]
-                if {$remaining > 0} {
-                    putserv "PRIVMSG $ops_channel :        ... y $remaining tickets pendientes más"
-                    putserv "PRIVMSG $ops_channel :          $sin_asignar sin asignar - Usa !tickets para ver todos"
-                }
-                break
-            }
-        }
-    } else {
-        putserv "PRIVMSG $ops_channel : "
-        putserv "PRIVMSG $ops_channel : 1 **TICKETS PENDIENTES:** No hay tickets pendientes"
-    }
-    
-    # ESTADÍSTICAS POR DÍA (solo del historial)
-    if {[llength [array names daily_stats]] > 0} {
-        putserv "PRIVMSG $ops_channel : "
-        putserv "PRIVMSG $ops_channel :  1**TICKETS CERRADOS POR DÍA:**"
-        
-        set days_list [lsort -decreasing [array names daily_stats]]
-        set count 0
-        foreach day $days_list {
-            incr count
-            if {$count <= 5} {  # Mostrar máximo 5 días
-                set tickets_day $daily_stats($day)
-                putserv "PRIVMSG $ops_channel :    $day: $tickets_day tickets"
-            }
-        }
-        
-        if {[llength $days_list] > 5} {
-            set remaining_days [expr {[llength $days_list] - 5}]
-            putserv "PRIVMSG $ops_channel :    ... y $remaining_days días más"
-        }
-    }
-    
-    # OPERADORES MÁS ACTIVOS (solo del historial)
-    if {[llength [array names operators]] > 0} {
-        putserv "PRIVMSG $ops_channel : "
-        putserv "PRIVMSG $ops_channel : 1 **TOP OPERADORES:**"
-        
-        # Ordenar operadores por cantidad de tickets
-        set operadores_ordenados [list]
-        foreach {op cantidad} [array get operators] {
-            lappend operadores_ordenados [list $cantidad $op]
-        }
-        set operadores_ordenados [lsort -decreasing -integer -index 0 $operadores_ordenados]
-        
-        set count 0
-        foreach item $operadores_ordenados {
-            incr count
-            set cantidad [lindex $item 0]
-            set op [lindex $item 1]
-            if {$count <= 5} {
-                set porcentaje_op [expr {$atendidos_historicos > 0 ? double($cantidad) * 100.0 / $atendidos_historicos : 0}]
-                set porcentaje_op_formateado [format "%.1f" $porcentaje_op]
-                putserv "PRIVMSG $ops_channel :    $count. $op: $cantidad tickets ($porcentaje_op_formateado%)"
-            }
-        }
-    }
-    
-    # USUARIOS MÁS ACTIVOS (combinando histórico y pendientes)
-    set todos_usuarios [array get users_historicos]
-    foreach {user cantidad} [array get users_pendientes] {
-        if {[dict exists $todos_usuarios $user]} {
-            dict set todos_usuarios $user [expr {[dict get $todos_usuarios $user] + $cantidad}]
+        if {$asignado eq "-" || $asignado eq ""} {
+            incr pending_tickets
         } else {
-            dict set todos_usuarios $user $cantidad
-        }
-    }
-    
-    if {[llength $todos_usuarios] > 0} {
-        putserv "PRIVMSG $ops_channel : "
-        putserv "PRIVMSG $ops_channel : 1 **TOP USUARIOS (total):**"
-        
-        # Ordenar usuarios por cantidad total de tickets
-        set usuarios_ordenados [list]
-        foreach {user cantidad} $todos_usuarios {
-            lappend usuarios_ordenados [list $cantidad $user]
-        }
-        set usuarios_ordenados [lsort -decreasing -integer -index 0 $usuarios_ordenados]
-        
-        set count 0
-        foreach item $usuarios_ordenados {
-            incr count
-            set cantidad [lindex $item 0]
-            set user [lindex $item 1]
-            if {$count <= 5} {
-                # Verificar si tiene tickets pendientes
-                set pendientes_user [expr {[info exists users_pendientes($user)] ? $users_pendientes($user) : 0}]
-                set estado [expr {$pendientes_user > 0 ? "4 $pendientes_user 1pendiente(s)" : "✅"}]
-                putserv "PRIVMSG $ops_channel :    $count. $user: $cantidad tickets $estado"
+            incr assigned_tickets
+            if {[info exists operators($asignado)]} {
+                incr operators($asignado)
+            } else {
+                set operators($asignado) 1
             }
         }
     }
     
-    # INFORMACIÓN ADICIONAL
-    putserv "PRIVMSG $ops_channel : "
-    putserv "PRIVMSG $ops_channel : 1 **INFORMACIÓN:**"
-    putserv "PRIVMSG $ops_channel :    ℹ Estadísticas basadas en últimos $days días"
-    putserv "PRIVMSG $ops_channel :    ℹ Incluye $total_pendientes pendientes y $total_historicos históricos"
-    if {$days != 30} {
-        putserv "PRIVMSG $ops_channel :    ℹ Usa: !estadisticas 30 para ver el último mes"
+    putserv "PRIVMSG $ops_channel :      ℹ **ESTADÍSTICAS DEL SISTEMA** ℹ 	 "
+    putserv "PRIVMSG $ops_channel :"
+    putserv "PRIVMSG $ops_channel :             **Resumen general:**	         "
+    putserv "PRIVMSG $ops_channel :   ℹ Total de tickets: $total_tickets        "
+    putserv "PRIVMSG $ops_channel :   ❌ Pendientes: $pending_tickets            "
+    putserv "PRIVMSG $ops_channel :   ✅ Atendidos: $assigned_tickets            "
+    
+    if {$total_tickets > 0} {
+        set porcentaje [expr {double($assigned_tickets) * 100 / $total_tickets}]
+        putserv "PRIVMSG $ops_channel :   ℹ Eficiencia: [format "%.1f" $porcentaje]% "
     }
-    putserv "PRIVMSG $ops_channel : ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    
+    if {[array size operators] > 0} {
+        putserv "PRIVMSG $ops_channel : **Tickets por operador:**                      "
+        set count 0
+        foreach op [lsort [array names operators]] {
+            incr count
+            if {$count <= 5} {
+                putserv "PRIVMSG $ops_channel :   ℹ $op: $operators($op) tickets      "
+            }
+        }
+        if {[array size operators] > 5} {
+            putserv "PRIVMSG $ops_channel :   ... y [expr {[array size operators] - 5}] operadores más "
+        }
+    }
+    
+    putserv "PRIVMSG $ops_channel :"
 }
 
 # Comando de información del sistema
@@ -1103,9 +796,3 @@ puts "Script: [file tail [info script]]"
 puts "Hora: [clock format [clock seconds]]"
 puts "=============================================="
 show_bot_info
-
-# En la parte final del script, después de show_bot_info:
-cleanup_old_history
-putlog "✅ Sistema de historial y estadísticas inicializado"
-
-
