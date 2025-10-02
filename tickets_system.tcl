@@ -26,8 +26,8 @@ if {![info exists license::validation_passed] || !$license::validation_passed} {
 set tickets_file "tickets.txt"
 set ticketslog_file "tickets.log"
 
-set support_channel "#ritmolatinos_help"
-set ops_channel     "#ritmolatinos_ad"
+set support_channel "#Opers_help" 
+set ops_channel     "#Opers"
 
 array set ticket_timers {
     warn       600
@@ -796,3 +796,4 @@ puts "Script: [file tail [info script]]"
 puts "Hora: [clock format [clock seconds]]"
 puts "=============================================="
 show_bot_info
+
