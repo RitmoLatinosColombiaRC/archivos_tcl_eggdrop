@@ -4,20 +4,34 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ritmo Latinos Colombia RC</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #0e0e0e;
+      background: linear-gradient(180deg, #000000 0%, #1a1a1a 100%);
       color: #f5f5f5;
       text-align: center;
       padding: 50px;
     }
+
+    img {
+      width: 180px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      box-shadow: 0 0 15px rgba(255, 204, 0, 0.5);
+    }
+
     h1 {
       color: #ffcc00;
+      margin-bottom: 10px;
     }
+
     p {
       margin-bottom: 30px;
+      font-size: 1.1em;
     }
+
     a {
       display: inline-block;
       background: #ffcc00;
@@ -29,25 +43,42 @@
       margin: 10px;
       transition: 0.3s;
     }
+
     a:hover {
-      background: #ffaa00;
+      transform: scale(1.05);
+      background: #ffdb4d;
+      box-shadow: 0 0 10px #ffcc00;
+    }
+
+    footer {
+      margin-top: 40px;
+      font-size: 0.9em;
+      color: #ccc;
     }
   </style>
 </head>
+
 <body>
+  <!-- LOGO -->
+  <img src="LogoRl.jpg" alt="Logo Ritmo Latinos Colombia RC">
+
+  <!-- TÍTULO -->
   <h1>Ritmo Latinos Colombia RC</h1>
   <p>Descarga los archivos disponibles para el sistema Eggdrop:</p>
 
+  <!-- BOTONES DE DESCARGA -->
   <a href="https://github.com/RitmoLatinosColombiaRC/archivos_tcl_eggdrop/raw/main/license_validation.tcl" download>
-    Descargar License Validation
+    <i class="fa-solid fa-download"></i> Descargar License Validation
   </a>
 
   <a href="https://github.com/RitmoLatinosColombiaRC/archivos_tcl_eggdrop/raw/main/tickets_system.tcl" download>
-    Descargar Ticket System
+    <i class="fa-solid fa-download"></i> Descargar Ticket System
   </a>
 
-  <p style="margin-top: 40px; font-size: 0.9em;">
+  <!-- PIE DE PÁGINA -->
+  <footer>
     © 2025 Ritmo Latinos Colombia RC — Todos los derechos reservados.
-  </p>
+  </footer>
 </body>
 </html>
+
