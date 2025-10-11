@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ritmo Latinos Colombia Radio Chat</title>
-  <link rel="icon" type="image/png" href="LogoRL.jpg" />
+  <link rel="icon" type="image/jpeg" href="LogoRL.jpg" />
   <style>
     body {
       background-color: #0a0a0a;
@@ -12,30 +12,29 @@
       font-family: "Segoe UI", sans-serif;
       text-align: center;
       margin: 0;
-      padding: 0;
     }
 
     header {
-      padding: 50px 20px 30px;
+      padding: 60px 20px 30px;
     }
 
     img.logo {
       width: 200px;
       border-radius: 15px;
-      box-shadow: 0 0 20px #f5c400;
+      box-shadow: 0 0 25px rgba(245, 196, 0, 0.5);
     }
 
     h1 {
       color: #f5c400;
-      font-size: 2.2rem;
-      margin-top: 20px;
+      font-size: 2.3rem;
+      margin-top: 25px;
       font-weight: 700;
     }
 
     p.slogan {
       color: #ccc;
       font-size: 1.1rem;
-      margin-bottom: 30px;
+      margin-bottom: 35px;
     }
 
     .btn-container {
@@ -52,7 +51,6 @@
       border: none;
       padding: 12px 25px;
       border-radius: 10px;
-      cursor: pointer;
       text-decoration: none;
       box-shadow: 0 5px 15px rgba(245, 196, 0, 0.3);
       transition: all 0.3s ease;
@@ -64,13 +62,13 @@
       box-shadow: 0 8px 25px rgba(245, 196, 0, 0.4);
     }
 
-    /* 🎧 Tarjeta del Reproductor */
+    /* 🎧 Tarjeta del reproductor */
     .player-card {
       background: #111;
       border: 1px solid #222;
-      border-radius: 20px;
+      border-radius: 18px;
       padding: 30px 20px;
-      max-width: 500px;
+      max-width: 520px;
       margin: 60px auto;
       box-shadow: 0 0 25px rgba(245, 196, 0, 0.15);
     }
@@ -94,18 +92,20 @@
     }
   </style>
 </head>
+
 <body>
   <header>
-    <img src="LogoRL.jpg" alt="Logo Ritmo Latinos Colombia RC" class="logo" />
+    <img src="LogoRL.jpg" alt="Logo Ritmo Latinos Colombia Radio Chat" class="logo" />
     <h1>Ritmo Latinos Colombia Radio Chat</h1>
     <p class="slogan">La radio que prende tus sentidos.</p>
+
     <div class="btn-container">
       <a href="#player" class="btn">▶️ Escúchanos</a>
       <a href="https://ritmolatinoscolombiarc.github.io/archivos_tcl_eggdrop/" class="btn">⬇️ Descargar</a>
     </div>
   </header>
 
-  <!-- 🎧 Reproductor Streamerr dentro de tarjeta -->
+  <!-- 🎧 Reproductor Streamerr -->
   <section class="player-card" id="player">
     <h2>🎧 En Vivo</h2>
     <div class="playerSCA" id="stream1"></div>
