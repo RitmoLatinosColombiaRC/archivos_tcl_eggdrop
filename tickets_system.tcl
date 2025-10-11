@@ -1,33 +1,31 @@
 #------------------------------------------------------------#
 #        🎟️ Sistema de Tickets – Ritmo Latinos Colombia      #
+#        🚀 VERSIÓN PROFESIONAL CORREGIDA - v2.1            #
 #------------------------------------------------------------#
 # Autor: Atómico (Founder)
-# Versión: 1.0
+# Versión: 2.1
 # Email: r.ritmo.latinos@gmail.com
 #
 # 📌 Descripción:
 # Servicio de ayuda y gestión de tickets para usuarios y operadores.
 # REQUIERE validación de licencia previa.
-# ADVERTENCIA: Este script se encuentra protegido por 4 capas de seguridad,-
-# - por lo tanto no intenten modificar el codigo o este dejara de funcionar.
-# Por otro lado la licencia puede ser rebocada si el sistema de licencia detecta
-# cualquier intento de modificacion o pirateo del mismo.
+# SISTEMA OPTIMIZADO Y CORREGIDO
 #------------------------------------------------------------#
 
 # Verificar que la licencia fue validada antes de continuar
-if {![info exists license::validation_passed] || !$license::validation_passed} {
+if {![license::is_validated]} {
     puts "❌ ERROR: La licencia no ha sido validada. Cargue primero license_validation.tcl"
     return
 }
 
 ### =======================
-### CONFIGURACIÓN
+### CONFIGURACIÓN MEJORADA
 ### =======================
 set tickets_file "tickets.txt"
 set ticketslog_file "tickets.log"
 
-set support_channel "#Opers_help" 
-set ops_channel     "#Opers"
+set support_channel "#ritmolatinos_help" 
+set ops_channel     "#ritmolatinos_ad"
 
 array set ticket_timers {
     warn       600
@@ -40,11 +38,18 @@ set max_daily_tickets 5
 set max_ticket_wait 600
 set akick_time 86400
 
-# Array para tracking de reconexiones
+# Arrays para tracking mejorados
 array set pending_reconnects {}
+array set flood_limit {}
+array set flood_count {}
+
+# Sistema de cache para mejor performance
+variable tickets_cache ""
+variable cache_timestamp 0
+variable file_lock 0
 
 ### =======================
-### UTILIDADES
+### UTILIDADES PROFESIONALES
 ### =======================
 proc read_file {filename} {
     if {![file exists $filename]} { return "" }
@@ -72,7 +77,53 @@ proc read_file_safe {filename} {
         write_file $filename ""
         return ""
     }
+    
+    # Verificar que sea un archivo regular
+    if {![file isfile $filename]} {
+        putlog "ERROR: $filename no es un archivo regular"
+        return ""
+    }
+    
     return [read_file $filename]
+}
+
+# Sistema de cache para tickets
+proc get_cached_tickets {} {
+    global tickets_file tickets_cache cache_timestamp
+    
+    set current_time [clock seconds]
+    if {$current_time - $cache_timestamp < 5 && $tickets_cache ne ""} {
+        return $tickets_cache
+    }
+    
+    set tickets_cache [split [read_file_safe $tickets_file] "\n"]
+    set cache_timestamp $current_time
+    return $tickets_cache
+}
+
+# Bloqueo para condiciones de carrera
+proc with_ticket_lock {script} {
+    global file_lock
+    
+    # Esperar máximo 5 segundos por el lock
+    set start_time [clock seconds]
+    while {$file_lock && ([clock seconds] - $start_time < 5)} {
+        after 100
+    }
+    
+    if {$file_lock} {
+        error "Timeout obteniendo lock para archivo de tickets"
+    }
+    
+    set file_lock 1
+    set result [catch {uplevel $script} error options]
+    set file_lock 0
+    
+    if {$result} {
+        return -code error $error
+    }
+    
+    return
 }
 
 ### =======================
@@ -97,14 +148,19 @@ proc is_authorized_op {nick chan} {
 }
 
 ### =======================
-### CONTROL ANTIFLOOD
+### CONTROL ANTIFLOOD MEJORADO
 ### =======================
-array set flood_limit {}
-array set flood_count {}
-
 proc check_flood {nick} {
     global flood_limit flood_count
     set now [clock seconds]
+
+    # Limpiar entradas antiguas (> 1 hora)
+    if {[array size flood_limit] > 1000} {
+        array unset flood_limit
+        array unset flood_count
+        array set flood_limit {}
+        array set flood_count {}
+    }
 
     if {![info exists flood_count($nick)]} {
         set flood_count($nick) 1
@@ -128,7 +184,7 @@ proc check_flood {nick} {
 ### INFORMACIÓN DEL BOT
 ### =======================
 set bot_name "IrcHelp"
-set bot_version "1.0"
+set bot_version "2.1"
 set bot_author "Atómico (Founder)"
 set bot_email "r.ritmo.latinos@gmail.com"
 set bot_server "irc.chatdetodos.com"
@@ -156,8 +212,6 @@ proc show_bot_info {} {
 ### =======================
 ### AUTO-VOICE PARA USUARIOS
 ### =======================
-set support_channel "#ritmolatinos_help"
-
 proc user_joined {nick uhost hand chan} {
     global support_channel pending_reconnects ops_channel
     
@@ -188,7 +242,7 @@ proc user_joined {nick uhost hand chan} {
 bind join - * user_joined
 
 ### =======================
-### SISTEMA DE RECONEXIÓN
+### SISTEMA DE RECONEXIÓN MEJORADO
 ### =======================
 proc user_left {nick uhost hand chan reason} {
     global tickets_file support_channel max_ticket_wait ops_channel pending_reconnects
@@ -200,30 +254,32 @@ proc user_left {nick uhost hand chan reason} {
     
     if {$chan ne $support_channel} { return }
     
-    set lines [split [read_file_safe $tickets_file] "\n"]
-    set found_assigned_tickets 0
-    
-    foreach line $lines {
-        if {$line eq ""} continue
-        set parts [split $line ";"]
-        if {[llength $parts] < 5} continue
+    with_ticket_lock {
+        set lines [get_cached_tickets]
+        set found_assigned_tickets 0
         
-        set t_id [lindex $parts 0]
-        set tnick [lindex $parts 1]
-        set tasign [lindex $parts 4]
-        
-        if {[string equal -nocase $tnick $nick] && $tasign ne "-" && $tasign ne ""} {
-            # Solo poner en espera tickets que ESTÁN SIENDO ATENDIDOS
-            set pending_reconnects($t_id) $nick
-            putserv "PRIVMSG $ops_channel :ℹ️ Ticket $t_id de $nick en espera por desconexión. Tiene $max_ticket_wait segundos para reconectar."
-            utimer $max_ticket_wait [list check_user_reconnected $t_id $nick]
-            set found_assigned_tickets 1
+        foreach line $lines {
+            if {$line eq ""} continue
+            set parts [split $line ";"]
+            if {[llength $parts] < 5} continue
+            
+            set t_id [lindex $parts 0]
+            set tnick [lindex $parts 1]
+            set tasign [lindex $parts 4]
+            
+            if {[string equal -nocase $tnick $nick] && $tasign ne "-" && $tasign ne ""} {
+                # Solo poner en espera tickets que ESTÁN SIENDO ATENDIDOS
+                set pending_reconnects($t_id) $nick
+                putserv "PRIVMSG $ops_channel :ℹ️ Ticket $t_id de $nick en espera por desconexión. Tiene $max_ticket_wait segundos para reconectar."
+                utimer $max_ticket_wait [list check_user_reconnected $t_id $nick]
+                set found_assigned_tickets 1
+            }
         }
-    }
-    
-    if {!$found_assigned_tickets} {
-        # Si el usuario no tenía tickets siendo atendidos, eliminar tickets no asignados
-        remove_unassigned_user_tickets $nick
+        
+        if {!$found_assigned_tickets} {
+            # Si el usuario no tenía tickets siendo atendidos, eliminar tickets no asignados
+            remove_unassigned_user_tickets $nick
+        }
     }
 }
 
@@ -234,8 +290,13 @@ proc check_user_reconnected {t_id nick} {
         return  # Ya fue manejado
     }
     
-    # Verificar si el usuario está actualmente en el canal
-    if {[onchan $nick $support_channel]} {
+    # Verificación robusta de presencia en canal
+    set is_present 0
+    if {[catch {set is_present [onchan $nick $support_channel]} error]} {
+        putlog "Error verificando presencia de $nick: $error"
+    }
+    
+    if {$is_present} {
         # ¡El usuario volvió! Mantener el ticket
         putserv "PRIVMSG $ops_channel :✅ Usuario $nick reconectó, ticket $t_id reactivado."
         unset pending_reconnects($t_id)
@@ -244,13 +305,15 @@ proc check_user_reconnected {t_id nick} {
     
     # Usuario no volvió - eliminar ticket
     unset pending_reconnects($t_id)
-    remove_specific_ticket $t_id $nick
+    with_ticket_lock {
+        remove_specific_ticket $t_id $nick
+    }
 }
 
 proc remove_specific_ticket {t_id nick} {
     global tickets_file ops_channel
     
-    set lines [split [read_file_safe $tickets_file] "\n"]
+    set lines [get_cached_tickets]
     set cleaned {}
     set removed 0
     
@@ -275,13 +338,17 @@ proc remove_specific_ticket {t_id nick} {
     
     if {$removed} {
         write_file $tickets_file [join $cleaned "\n"]
+        # Actualizar cache
+        global tickets_cache cache_timestamp
+        set tickets_cache [split [join $cleaned "\n"] "\n"]
+        set cache_timestamp [clock seconds]
     }
 }
 
 proc remove_unassigned_user_tickets {nick} {
     global tickets_file ops_channel
     
-    set lines [split [read_file_safe $tickets_file] "\n"]
+    set lines [get_cached_tickets]
     set cleaned {}
     set removed 0
     
@@ -306,6 +373,10 @@ proc remove_unassigned_user_tickets {nick} {
     
     if {$removed} {
         write_file $tickets_file [join $cleaned "\n"]
+        # Actualizar cache
+        global tickets_cache cache_timestamp
+        set tickets_cache [split [join $cleaned "\n"] "\n"]
+        set cache_timestamp [clock seconds]
         putserv "PRIVMSG $ops_channel :ℹ️ Tickets no asignados de $nick eliminados por desconexión."
     }
 }
@@ -314,7 +385,7 @@ bind part - * user_left
 bind sign - * user_left
 
 ### =======================
-### COMANDOS BOT
+### COMANDOS BOT MEJORADOS
 ### =======================
 
 # Crear ticket (!ticket <detalle>)
@@ -344,39 +415,46 @@ proc create_ticket {nick uhost hand chan text} {
         return
     }
 
-    set data [read_file_safe $tickets_file]
-    set count 0
-    foreach line [split $data "\n"] {
-        if {$line eq ""} continue
-        set parts [split $line ";"]
-        if {[llength $parts] < 5} continue
-        set tnick [lindex $parts 1]
-        set tasign [lindex $parts 4]
-        # Solo contar tickets activos (no cerrados) del mismo usuario
-        if {[string equal -nocase $tnick $nick] && $tasign ne "CLOSED"} {
-            incr count
+    with_ticket_lock {
+        set data [read_file_safe $tickets_file]
+        set count 0
+        foreach line [split $data "\n"] {
+            if {$line eq ""} continue
+            set parts [split $line ";"]
+            if {[llength $parts] < 5} continue
+            set tnick [lindex $parts 1]
+            set tasign [lindex $parts 4]
+            # Solo contar tickets activos (no cerrados) del mismo usuario
+            if {[string equal -nocase $tnick $nick] && $tasign ne "CLOSED"} {
+                incr count
+            }
         }
-    }
 
-    if {$count >= $max_daily_tickets} {
-        putserv "NOTICE $nick :❌ Has excedido el límite diario de tickets. Debes esperar 24 horas para crear un nuevo ticket."
-        putserv "KICK $support_channel $nick :🚫 Has superado el límite de solicitudes de ayuda. Vuelve en 24h."
-        putserv "/cs akick $support_channel add $uhost Has sido sancionado por exceder el límite de solicitudes en $support_channel."
-        utimer $akick_time [list putserv ".MSG ChanServ akick $support_channel del $uhost"]
-        return
-    }
+        if {$count >= $max_daily_tickets} {
+            putserv "NOTICE $nick :❌ Has excedido el límite diario de tickets. Debes esperar 24 horas para crear un nuevo ticket."
+            putserv "KICK $support_channel $nick :🚫 Has superado el límite de solicitudes de ayuda. Vuelve en 24h."
+            putserv "CS akick $support_channel add $uhost Has sido sancionado por exceder el límite de solicitudes en $support_channel."
+            utimer $akick_time [list putserv "CS akick $support_channel del $uhost"]
+            return
+        }
 
-    set restante [expr {$max_daily_tickets - $count}]
-    if {$restante > 0} {
-        putserv "NOTICE $nick :ℹ️ Puedes crear $restante ticket(s) más hoy."
-    }
+        set restante [expr {$max_daily_tickets - $count}]
+        if {$restante > 0} {
+            putserv "NOTICE $nick :ℹ️ Puedes crear $restante ticket(s) más hoy."
+        }
 
-    set timestamp [clock seconds]
-    set ticket_id $timestamp
-    set line "$ticket_id;$nick;[maskhost $uhost];$text;-"
-    set fp [open $tickets_file a]
-    puts $fp $line
-    close $fp
+        set timestamp [clock seconds]
+        set ticket_id $timestamp
+        set line "$ticket_id;$nick;[maskhost $uhost];$text;-"
+        set fp [open $tickets_file a]
+        puts $fp $line
+        close $fp
+
+        # Actualizar cache
+        global tickets_cache cache_timestamp
+        set tickets_cache [split [read_file_safe $tickets_file] "\n"]
+        set cache_timestamp [clock seconds]
+    }
 
     putserv "NOTICE $nick :✅ Ticket creado (ID $ticket_id). Un operador te atenderá pronto."
     putserv "MODE $support_channel +v $nick"
@@ -397,14 +475,14 @@ proc show_tickets {nick uhost hand chan text} {
 
     if {$chan ne $ops_channel} { return }
 
-    set data [read_file_safe $tickets_file]
-    if {$data eq ""} {
+    set lines [get_cached_tickets]
+    if {[llength $lines] == 0 || ($lines eq "")} {
         putserv "PRIVMSG $ops_channel :❌ No hay tickets abiertos."
         return
     }
 
     set items [list]
-    foreach line [split $data "\n"] {
+    foreach line $lines {
         set line_trimmed [string trim $line]
         if {$line_trimmed ne "" && [llength [split $line_trimmed ";"]] >= 5} {
             lappend items $line_trimmed
@@ -452,43 +530,52 @@ proc take_ticket {opnick uhost hand chan text} {
         return
     }
 
-    set lines [split [read_file_safe $tickets_file] "\n"]
-    set cleaned {}
-    set found 0
+    with_ticket_lock {
+        set lines [get_cached_tickets]
+        set cleaned {}
+        set found 0
 
-    foreach line $lines {
-        if {$line eq ""} continue
-        set parts [split $line ";"]
-        if {[llength $parts] < 5} { 
-            lappend cleaned $line
-            continue 
-        }
-
-        set t_id [lindex $parts 0]
-        set tnick [lindex $parts 1]
-        set thost [lindex $parts 2]
-        set detalle [lindex $parts 3]
-        set tasign [lindex $parts 4]
-
-        if {$text == $t_id || [string equal -nocase $text $tnick]} {
-            set found 1
-            if {$tasign ne "-" && $tasign ne ""} {
-                putserv "PRIVMSG $ops_channel :⚠️ Ticket $t_id ya tomado por $tasign."
+        foreach line $lines {
+            if {$line eq ""} continue
+            set parts [split $line ";"]
+            if {[llength $parts] < 5} { 
                 lappend cleaned $line
+                continue 
+            }
+
+            set t_id [lindex $parts 0]
+            set tnick [lindex $parts 1]
+            set thost [lindex $parts 2]
+            set detalle [lindex $parts 3]
+            set tasign [lindex $parts 4]
+
+            if {$text == $t_id || [string equal -nocase $text $tnick]} {
+                set found 1
+                if {$tasign ne "-" && $tasign ne ""} {
+                    putserv "PRIVMSG $ops_channel :⚠️ Ticket $t_id ya tomado por $tasign."
+                    lappend cleaned $line
+                } else {
+                    set line "$t_id;$tnick;$thost;$detalle;$opnick"
+                    putserv "PRIVMSG $ops_channel :✅ $opnick atenderá ticket $t_id de $tnick → $detalle"
+                    putserv "NOTICE $tnick :✅ Hola $tnick, el operador $opnick atenderá tu solicitud con número de ticket #$t_id."
+                    lappend cleaned $line
+                }
             } else {
-                set line "$t_id;$tnick;$thost;$detalle;$opnick"
-                putserv "PRIVMSG $ops_channel :✅ $opnick atenderá ticket $t_id de $tnick → $detalle"
-                putserv "NOTICE $tnick :✅ Hola $tnick, el operador $opnick atenderá tu solicitud con número de ticket #$t_id."
                 lappend cleaned $line
             }
-        } else {
-            lappend cleaned $line
         }
-    }
 
-    write_file $tickets_file [join $cleaned "\n"]
-    if {!$found} { 
-        putserv "PRIVMSG $ops_channel :❌ No se encontró ticket para $text" 
+        if {[llength $cleaned] > 0} {
+            write_file $tickets_file [join $cleaned "\n"]
+            # Actualizar cache
+            global tickets_cache cache_timestamp
+            set tickets_cache $cleaned
+            set cache_timestamp [clock seconds]
+        }
+        
+        if {!$found} { 
+            putserv "PRIVMSG $ops_channel :❌ No se encontró ticket para $text" 
+        }
     }
 }
 
@@ -509,59 +596,67 @@ proc close_ticket {nick uhost hand chan text} {
         return
     }
 
-    set lines [split [read_file_safe $tickets_file] "\n"]
-    set cleaned {}
-    set found 0
-    set user_to_kick ""
-    set user_host ""
+    with_ticket_lock {
+        set lines [get_cached_tickets]
+        set cleaned {}
+        set found 0
+        set user_to_kick ""
+        set user_host ""
 
-    foreach line $lines {
-        if {$line eq ""} continue
-        set parts [split $line ";"]
-        if {[llength $parts] < 5} { 
-            lappend cleaned $line
-            continue 
-        }
-
-        set t_id [lindex $parts 0]
-        set tnick [lindex $parts 1]
-        set thost [lindex $parts 2]
-        set detalle [lindex $parts 3]
-        set tasign [lindex $parts 4]
-
-        if {$text == $t_id || [string equal -nocase $text $tnick]} {
-            set found 1
-            set user_to_kick $tnick
-            set user_host $thost
-            
-            if {$text == $t_id} {
-                putserv "PRIVMSG $ops_channel :✔ Ticket $t_id de $tnick cerrado."
-                putserv "NOTICE $tnick :✅ Tu ticket #$t_id ha sido cerrado por $nick."
-            } else {
-                putserv "PRIVMSG $ops_channel :✔ Todos los tickets de $tnick cerrados por $nick."
-                putserv "NOTICE $tnick :✅ Todos tus tickets han sido cerrados por $nick."
+        foreach line $lines {
+            if {$line eq ""} continue
+            set parts [split $line ";"]
+            if {[llength $parts] < 5} { 
+                lappend cleaned $line
+                continue 
             }
-            continue
+
+            set t_id [lindex $parts 0]
+            set tnick [lindex $parts 1]
+            set thost [lindex $parts 2]
+            set detalle [lindex $parts 3]
+            set tasign [lindex $parts 4]
+
+            if {$text == $t_id || [string equal -nocase $text $tnick]} {
+                set found 1
+                set user_to_kick $tnick
+                set user_host $thost
+                
+                if {$text == $t_id} {
+                    putserv "PRIVMSG $ops_channel :✔ Ticket $t_id de $tnick cerrado."
+                    putserv "NOTICE $tnick :✅ Tu ticket #$t_id ha sido cerrado por $nick."
+                } else {
+                    putserv "PRIVMSG $ops_channel :✔ Todos los tickets de $tnick cerrados por $nick."
+                    putserv "NOTICE $tnick :✅ Todos tus tickets han sido cerrados por $nick."
+                }
+                continue
+            }
+            lappend cleaned $line
         }
-        lappend cleaned $line
-    }
 
-    write_file $tickets_file [join $cleaned "\n"]
-
-    if {$found && $user_to_kick ne ""} {
-        putserv "MODE $support_channel -v $user_to_kick"
-        
-        # Solo aplicar ban si se cierra por nick (todos los tickets)
-        if {![string is integer -strict $text]} {
-            set host_mask "*!*@[lindex [split $user_host @] 1]"
-            putserv "MODE $support_channel +b $host_mask"
-            putserv "KICK $support_channel $user_to_kick :✅ Soporte terminado. Todos tus tickets han sido cerrados, gracias por visitarnos."
-            utimer $ticket_ban_time [list putserv "MODE $support_channel -b $host_mask"]
+        if {[llength $cleaned] > 0} {
+            write_file $tickets_file [join $cleaned "\n"]
+            # Actualizar cache
+            global tickets_cache cache_timestamp
+            set tickets_cache $cleaned
+            set cache_timestamp [clock seconds]
         }
-    }
 
-    if {!$found} { 
-        putserv "PRIVMSG $ops_channel :❌ No se encontró ticket para $text" 
+        if {$found && $user_to_kick ne ""} {
+            putserv "MODE $support_channel -v $user_to_kick"
+            
+            # Solo aplicar ban si se cierra por nick (todos los tickets)
+            if {![string is integer -strict $text]} {
+                set host_mask "*!*@[lindex [split $user_host @] 1]"
+                putserv "MODE $support_channel +b $host_mask"
+                putserv "KICK $support_channel $user_to_kick :✅ Soporte terminado. Todos tus tickets han sido cerrados, gracias por visitarnos."
+                utimer $ticket_ban_time [list putserv "MODE $support_channel -b $host_mask"]
+            }
+        }
+
+        if {!$found} { 
+            putserv "PRIVMSG $ops_channel :❌ No se encontró ticket para $text" 
+        }
     }
 }
 
@@ -574,48 +669,56 @@ proc check_tickets {} {
     }
     
     set now [clock seconds]
-    set lines [split [read_file_safe $tickets_file] "\n"]
-    set cleaned {}
+    
+    with_ticket_lock {
+        set lines [get_cached_tickets]
+        set cleaned {}
 
-    foreach line $lines {
-        if {$line eq ""} continue
-        set parts [split $line ";"]
-        if {[llength $parts] < 5} { continue }
-        
-        set t_id [lindex $parts 0]
-        set nick [lindex $parts 1]
-        set timestamp [lindex $parts 0]
-        set tasign [lindex $parts 4]
+        foreach line $lines {
+            if {$line eq ""} continue
+            set parts [split $line ";"]
+            if {[llength $parts] < 5} { continue }
+            
+            set t_id [lindex $parts 0]
+            set tnick [lindex $parts 1]
+            set timestamp [lindex $parts 0]
+            set tasign [lindex $parts 4]
 
-        if {[string is integer -strict $timestamp]} {
-            set age [expr {$now - $timestamp}]
-        } else { 
-            set age 0 
+            if {[string is integer -strict $timestamp]} {
+                set age [expr {$now - $timestamp}]
+            } else { 
+                set age 0 
+            }
+
+            if {$age >= $ticket_timers(autoclose) && ($tasign eq "-" || $tasign eq "")} {
+                putserv "NOTICE $tnick :❌ Tu ticket ha sido cerrado automáticamente por inactividad."
+                putserv "PRIVMSG $ops_channel :❌ Ticket $t_id de $tnick cerrado automáticamente por inactividad."
+                putlog "Ticket $t_id de $tnick cerrado automáticamente por inactividad."
+                continue
+            }
+
+            if {$age >= $ticket_timers(escalate) && ($tasign eq "-" || $tasign eq "")} {
+                putserv "PRIVMSG $ops_channel :🚨 Atención: ticket #$t_id de $tnick lleva 30 minutos pendiente."
+            }
+
+            if {$age >= $ticket_timers(warn) && ($tasign eq "-" || $tasign eq "")} {
+                putserv "NOTICE $tnick :⏳ Tu solicitud sigue pendiente. Paciencia por favor."
+            }
+
+            lappend cleaned $line
         }
 
-        if {$age >= $ticket_timers(autoclose) && ($tasign eq "-" || $tasign eq "")} {
-            putserv "NOTICE $nick :❌ Tu ticket ha sido cerrado automáticamente por inactividad."
-            putserv "PRIVMSG $ops_channel :❌ Ticket $t_id de $nick cerrado automáticamente por inactividad."
-            putlog "Ticket $t_id de $nick cerrado automáticamente por inactividad."
-            continue
+        if {[llength $cleaned] > 0} {
+            write_file $tickets_file [join $cleaned "\n"]
+            # Actualizar cache
+            global tickets_cache cache_timestamp
+            set tickets_cache $cleaned
+            set cache_timestamp [clock seconds]
         }
-
-        if {$age >= $ticket_timers(escalate) && ($tasign eq "-" || $tasign eq "")} {
-            putserv "PRIVMSG $ops_channel :🚨 Atención: ticket #$t_id de $nick lleva 30 minutos pendiente."
-        }
-
-        if {$age >= $ticket_timers(warn) && ($tasign eq "-" || $tasign eq "")} {
-            putserv "NOTICE $nick :⏳ Tu solicitud sigue pendiente. Paciencia por favor."
-        }
-
-        lappend cleaned $line
     }
-
-    write_file $tickets_file [join $cleaned "\n"]
 }
 
-# Iniciar el timer de revisión (solo una vez)
-utimer 300 check_tickets
+# Iniciar el timer de revisión (SOLO UNA VEZ)
 timer 300 check_tickets
 
 # Comando de ayuda (!help)
@@ -701,13 +804,13 @@ proc show_stats {nick uhost hand chan text} {
 
     if {$chan ne $ops_channel} { return }
     
-    set data [read_file_safe $tickets_file]
+    set lines [get_cached_tickets]
     set total_tickets 0
     set pending_tickets 0
     set assigned_tickets 0
     array set operators {}
     
-    foreach line [split $data "\n"] {
+    foreach line $lines {
         if {$line eq ""} continue
         set parts [split $line ";"]
         if {[llength $parts] < 5} continue
@@ -796,5 +899,3 @@ puts "Script: [file tail [info script]]"
 puts "Hora: [clock format [clock seconds]]"
 puts "=============================================="
 show_bot_info
-
-
