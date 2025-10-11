@@ -7,108 +7,81 @@
   <style>
     body {
       background-color: #0d0d0d;
-      color: #f0f0f0;
+      color: #fff;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       text-align: center;
-      margin: 0;
-      padding: 0;
+      padding: 30px;
     }
-
-    img.logo {
-      margin-top: 40px;
-      width: 220px;
-      height: auto;
-      border-radius: 15px;
-      box-shadow: 0 0 25px rgba(255, 204, 0, 0.4);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    img {
+      width: 180px;
+      margin-bottom: 20px;
+      border-radius: 20px;
+      box-shadow: 0 0 25px #ffcc00;
     }
-
-    img.logo:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 35px rgba(255, 204, 0, 0.8);
-    }
-
     h1 {
       color: #ffcc00;
-      font-size: 2em;
-      margin-top: 20px;
+      font-size: 2rem;
+      margin-top: 10px;
     }
-
     p {
-      font-size: 1.1em;
-      color: #e0e0e0;
-      margin-bottom: 40px;
+      font-size: 1.1rem;
+      margin-bottom: 25px;
     }
-
-    .button-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-      margin-bottom: 50px;
-    }
-
-    .download-button {
+    .btn {
+      display: inline-block;
+      margin: 10px;
+      padding: 15px 25px;
       background-color: #ffcc00;
       color: #000;
+      font-weight: bold;
       border: none;
-      padding: 15px 25px;
-      font-size: 1.1em;
       border-radius: 10px;
       cursor: pointer;
-      font-weight: bold;
-      box-shadow: 0 4px 10px rgba(255, 204, 0, 0.3);
+      font-size: 1rem;
       transition: all 0.3s ease;
     }
-
-    .download-button:hover {
+    .btn:hover {
       background-color: #ffd633;
-      box-shadow: 0 6px 20px rgba(255, 204, 0, 0.5);
-      transform: translateY(-3px);
+      transform: scale(1.05);
+      box-shadow: 0 0 15px #ffcc00;
     }
-
+    .player-container {
+      margin: 40px auto;
+      text-align: center;
+    }
     footer {
-      font-size: 0.9em;
+      margin-top: 50px;
+      font-size: 0.9rem;
       color: #aaa;
-      padding-bottom: 30px;
-    }
-
-    /* Responsive */
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 1.6em;
-      }
-      p {
-        font-size: 1em;
-      }
-      .download-button {
-        width: 80%;
-      }
-      img.logo {
-        width: 180px;
-      }
     }
   </style>
 </head>
 <body>
-
-  <img src="LogoRL.jpg" alt="Logo Ritmo Latinos Colombia RC" class="logo">
+  <img src="LogoRL.jpg" alt="Logo Ritmo Latinos Colombia RC">
   <h1>Ritmo Latinos Colombia RC</h1>
   <p>Descarga los archivos disponibles para el sistema Eggdrop:</p>
 
-  <div class="button-container">
-    <a href="LicenseValidation.zip" download>
-      <button class="download-button">⬇️ Descargar License Validation</button>
-    </a>
-    <a href="TicketSystem.zip" download>
-      <button class="download-button">⬇️ Descargar Ticket System</button>
-    </a>
+  <button class="btn" onclick="window.location.href='license_validation.tcl'">⬇ Descargar License Validation</button>
+  <button class="btn" onclick="window.location.href='tickets_system.tcl'">⬇ Descargar Ticket System</button>
+
+  <!-- 🎧 Reproductor Streamerr -->
+  <div class="player-container">
+    <div class="playerSCA" id="stream1"></div>
   </div>
+
+  <!-- Scripts del reproductor -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script>
+    var bu = "https://player.streamerr.co/";
+    var jQuery_3_5_1 = $.noConflict(true);
+    var uid = 405;
+    var pid = 823;
+  </script>
+  <script src="https://player.streamerr.co/player/bundle.js"></script>
+  <script src="https://player.streamerr.co/player/init.js"></script>
 
   <footer>
     © 2024 - 2025 Ritmo Latinos Colombia RC — Todos los derechos reservados.
   </footer>
-
 </body>
 </html>
-
