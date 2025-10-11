@@ -22,9 +22,9 @@ profesional, ligero y totalmente integrado con Eggdrop.
 
 🔧 Integración total con Eggdrop y ChanServ
 
-─────────────────────────
+────────────────────────
 🌐 COMPATIBILIDAD DE SERVIDORES
-─────────────────────────
+────────────────────────
 
 	Servidor IRC			ChanServ 	Prefijos (o,h,a,q,v) 		Compatibilidad 
 
