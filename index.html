@@ -101,6 +101,17 @@
       .hero .logo{width:130px;}
       .hero-player{padding:15px;margin:20px 0 0 0;}
     }
+    
+    /* Optimización para móviles muy pequeños */
+    @media (max-width:400px){
+      .hero-player{padding:12px;}
+      .hero{padding-top:90px;}
+      .hero h1{font-size:1.4rem;}
+      .hero .logo{width:110px;}
+      .brand img{width:48px;}
+      .brand h4{font-size:13px;}
+      nav a{font-size:12px;margin-left:8px;}
+    }
 
     /* Smooth scroll */
     html{scroll-behavior:smooth;}
@@ -116,7 +127,7 @@
   <header>
     <div class="nav-inner">
       <div class="brand">
-        <img src="LogoRL.jpg" alt="Logo Ritmo Latinos" />
+        <img src="LogoRL.jpg" alt="Logo Ritmo Latinos" loading="lazy" />
         <div>
           <h4>Ritmo Latinos Colombia</h4>
           <div class="muted" style="font-size:12px;">La radio que prende tus sentidos</div>
@@ -141,7 +152,7 @@
   <!-- HERO / INICIO -->
   <main class="container" id="inicio">
     <section class="hero">
-      <img src="LogoRL.jpg" alt="Logo Ritmo Latinos Colombia" class="logo">
+      <img src="LogoRL.jpg" alt="Logo Ritmo Latinos Colombia" class="logo" loading="lazy">
       <h1>Ritmo Latinos Colombia Radio Chat</h1>
       <p class="lead">La radio que prende tus sentidos.</p>
 
@@ -203,22 +214,22 @@
 
       <div class="staff-grid" style="margin-top:16px;">
         <div class="staff-item">
-          <img src="https://via.placeholder.com/150" alt="DJ Example">
+          <img src="https://via.placeholder.com/150" alt="DJ Example" loading="lazy">
           <div class="name">DJ Ejemplo</div>
           <div class="role muted">Productor</div>
         </div>
         <div class="staff-item">
-          <img src="https://via.placeholder.com/150" alt="Presentador">
+          <img src="https://via.placeholder.com/150" alt="Presentador" loading="lazy">
           <div class="name">Presentador</div>
           <div class="role muted">Conductor</div>
         </div>
         <div class="staff-item">
-          <img src="https://via.placeholder.com/150" alt="Soporte">
+          <img src="https://via.placeholder.com/150" alt="Soporte" loading="lazy">
           <div class="name">Soporte</div>
           <div class="role muted">Soporte técnico</div>
         </div>
         <div class="staff-item">
-          <img src="https://via.placeholder.com/150" alt="Community">
+          <img src="https://via.placeholder.com/150" alt="Community" loading="lazy">
           <div class="name">Community</div>
           <div class="role muted">Comunidad</div>
         </div>
@@ -258,10 +269,35 @@
       <div class="section-title">
         <h2 id="quienes-title">Quienes Somos</h2>
       </div>
-      <p class="lead-small muted">Ritmo Latinos: una comunidad de radio y chat dedicada a la música latina y entretenimiento.</p>
+      <p class="lead-small muted">Ritmo Latinos nació el 4 de abril del 2014, este proyecto fue iniciado por una idea desarrollada entre Musicólogo y otros compañeros de la fundadora Gaviota_-, por diversas situaciones la radio paso a manos de Atómico otro amigo y colaborador de la idea y el proyecto de Ritmo Latinos paso a ser Ritmo Latinos MX con un nuevo sonido de alta fidelidad y emitiendo a 320 kbs nuestros djs los mejores  se hicieron participes de muchos programas de emisión, a mediados del año 2018 y 2019 la radio salió del aire por inconvenientes relacionados con personas que tenían malas intenciones para acabar con la misma, nuestra emisora online en estos momentos está en un proceso de crecimiento caminando hacia adelante y contra todo pronóstico.
+A principios del año 2020 volvimos con ideas frescas las cuales iremos mostrando al pasar del tiempo, esperamos que nuestros oyentes nos sigan apoyando como lo ha venido haciendo gracias a ustedes somos Ritmo Latinos Colombia Radio, La radio que prende tus sentidos.​</p>
       <div style="margin-top:14px;" class="card">
         <h3>Nuestra misión</h3>
         <p class="muted">Crear un espacio donde la comunidad disfrute de buena música, eventos y soporte técnico para proyectos relacionados con Eggdrop.</p>
+		<h3>Lineamientos</h3>
+		<p class="muted">Ritmo Latinos Colombia Radio es una comunidad pluralista, divertida, que busca la unión de todos los usuarios sin distinción de género, raza, nacionalidad, ni de ninguna otra índole.
+		Ritmo Latinos Colombia Radio es un Radio Online cuya finalidad es la transmisión de música en tiempo real.
+
+		Ritmo Latinos Colombia Radio promueve la integración de personas de todo el mundo en virtud a la música, usando para ello sitios web y distintos chat´s y redes sociales para tal fin.
+
+		Ritmo Latinos Colombia Radio es de naturaleza no lucrativa es decir no genera ingresos o beneficio económicos para los integrantes de la misma, pero estamos en la libertad de recaudar fondos para la manutención de los servicios tanto del streaming como del sitio web en calidad de donaciones por los usuarios del chat donde nos ubiquemos o nuestros oyentes...
+
+		Ritmo Latinos Colombia Radio busca dar un buen trato a todos sus usuarios y oyentes tanto en la sala de chat como en sus emisiones para que se sientan a gusto con música variada y programas radiales amenos.​
+
+		Ritmo Latinos Colombia Radio respeta plenamente los derechos de autor de las obras, interpretaciones o ejecuciones artísticas, fonogramas, grabaciones audiovisuales y emisiones de radiodifusión objeto de transmisión; en tal virtud ejerce la condición de atribución, reconoce y cita la obra de la forma especificada por el autor o el licenciante, lo que se publicita visualmente a través del reproductor de radio y en forma sonora a través de los locutores.</p>
+		<h3>Agradecimientos</h3>
+		<p class="muted">Agradecemos también a cada Founder y Sucesor de los Canales hermanos, Amig@sRL Y radioescuchas por su preferencia, cariño, apoyo y sintonía.
+		A cada uno de los Administradores por su gran desempeño y disponibilidad,   Locutores y Dj's que son y han tenido su dedicación en Radio Ritmo Latinos, a todos los Amig@sRL radio escuchas de diferentes partes del mundo por su preferencia, sintonizando día a día nuestra radio y acompañarnos en las diferentes redes sociales. 
+		Para ti Volovan que en su debido momento  apoyaste y fue importante éste proyecto y por azahares de la Vida ya no pudo ser así,  Musicólogo con su  gran experiencia en la locución virtual por su apoyo, sabiduría y carisma, y un gran  amigo  Atomico por sus conocimientos, dedicación, entrega y experiencia.</p>
+		<h3>Agradecimiento a Nuestros Nuevos y Talentosos DJ´s</h3>
+		<p class="muted">Queridos DJs, Brandy, Papas_fritas, Kalanys, Errante_Del_Sol, Valquiria, Albertdj, Romi, _xAXiXAx _, Pompompuri, Cuervo, Andrea, lalala, Shaplin y todos los que han contribuido al éxito de Ritmo Latinos Colombia, ¡Queremos expresar nuestro más sincero agradecimiento por su apoyo inquebrantable a nuestra radio! Cada uno de ustedes ha desempeñado un papel fundamental en el crecimiento y la vibrante energía que aportan a nuestra comunidad de oyentes.
+		Su pasión por la música latina y su talento en las mezclas han elevado la experiencia de nuestros oyentes a un nivel completamente nuevo. Cada vez que sintonizan y comparten sus mezclas con nosotros, están llevando la cultura y la pasión de América Latina a todo el mundo.
+		La música tiene el poder de unir a las personas, y ustedes son la prueba viva de ello. Su dedicación y energía son invaluables, y estamos agradecidos por cada momento que han invertido en hacer que Ritmo Latinos Colombia sea un lugar vibrante y emocionante.
+		Gracias por ser parte de nuestra familia y por compartir su amor por la música latina con el mundo. Esperamos que continúen siendo una parte integral de nuestra misión de difundir la alegría y el ritmo de nuestra herencia musical.
+		¡Nuestro más profundo agradecimiento y un abrazo musical!
+		Con gratitud, Atomico, MarioBros, CucarachitaPR,  _Munay_.
+		Administradores de Ritmo Latinos Colombia Radio Chat.
+		La radio Que Prende Tus Sentidos.</p>
       </div>
     </section>
 
@@ -287,9 +323,72 @@
       <p class="lead-small muted">Reglas básicas de convivencia en el chat y la radio.</p>
       <div style="margin-top:14px;" class="card">
         <ol class="muted" style="padding-left:18px;margin:0;">
-          <li>Respeto entre usuarios.</li>
-          <li>No spam ni publicidad no autorizada.</li>
-          <li>Seguir indicaciones del staff durante transmisiones en vivo.</li>
+		<h2 id="normas-title">💫 NORMAS PARA DJ’S Y LOCUTORES RL 💫</h2>
+		  <h3>🎤 Respeto y Comportamiento</h3>
+          <li>Sé amable y respetuoso con Roots, Admins, compañeros y oyentes.</li>
+          <li>Acompaña las emisiones de tus colegas: comparte, comenta y disfruta.</li>
+          <li>Evita groserías o temas sensibles (política, religión, etc.) durante tus emisiones.</li>
+		  <li>No menciones nombres de otras radios ni generes discusiones en sala.</li>
+		  <li>Mantén un ambiente alegre, sin lenguaje ofensivo ni gestos inapropiados.</li>
+		  <h3>⏰ Emisiones y Disciplina</h3>
+		  <li>Cumple tus horarios y llega 15 minutos antes para preparar tu emisión.</li>
+		  <li>Realiza el pase de radio con ayuda de un Admin o Root.</li>
+		  <li>Empieza con el spot oficial de Ritmo Latinos y dedica un tema al DJ que te pasó la radio.</li>
+		  <li>Haz tus emisiones interactivas y amenas, saludando a los canales hermanos RL.</li>
+		  <li>Cierra peticiones 15 minutos antes de finalizar tu turno.</li>
+		  <li>Si no puedes emitir, avisa a un Root, Admin o compañero para cubrirte.</li>
+		  <li>Puedes emitir en otras radios, pero no promociones ni desvíes oyentes durante tus turnos en RL.</li>
+		  <h3>🚫 Prohibiciones</h3>
+		  <li>No se permiten canciones con contenido sexual, violento o de drogas.</li>
+		  <li>No discutas en sala ni filtres información privada del equipo RL.</li>
+		  <li>No uses la radio con fines personales o intereses ajenos a la emisora.</li>
+		  <li>No menciones asuntos internos de la radio durante tu emisión.</li>
+		  <h3>⚖️ Sanciones</h3>
+		  <li>Faltar tres veces sin aviso implica pérdida del horario.</li>
+		  <li>Quien no ingrese a las salas del tópico antes de emitir no podrá hacerlo.
+		  <li>Ausencias prolongadas sin aviso causarán reasignación de horarios.</li>
+		  <li>Filtrar información o usar la radio con fines personales conlleva baja definitiva.</li>
+		  <h3>🎶 En Ritmo Latinos:</h3>
+		  <p class="muted">Somos una familia de respeto, amor y alegría. Cuida tu imagen, disfruta de tus emisiones y comparte la buena energía con nuestros Amig@sRL.</p>
+		  <p>------</p>
+		  <h2 id="normas-title">💫 NORMAS GENERALES PARA USUARIOS DEL CANAL #RITMOLATINOS 💫</h2>
+		  <p class="muted">¡Bienvenid@ al canal oficial de Ritmo Latinos Colombia Radio Chat! Aquí compartimos buena música, amistad y diversión, siempre con respeto y armonía.</p>
+		  <h3>🎧 Comportamiento</h3>
+		   <li>Mantén una buena convivencia: no se permiten faltas de respeto, groserías, burlas, sarcasmo malintencionado ni comentarios discriminatorios.</li>
+		   <li>Evita discusiones o provocaciones que generen conflictos.</li>
+		   <li>Todos somos parte de una familia, así que cuida el ambiente positivo del canal.</li>
+		  <h3>🚫 Temas y Contenido</h3>
+		   <li>No se permite contenido sexual, ni en conversación ni en NickNames.</li>
+		   <li>No se aceptan Nicks con lenguaje ofensivo, sexual o similar a los de los administradores, roots o DJ’s.</li>
+		   <li>El canal es de radio online, por lo tanto el enfoque debe ser musical, alegre y respetuoso.</li>
+		  <h3>💌 SPAM y Privacidad</h3>
+		   <li>No se permite pedir ni ofrecer datos personales (teléfonos, redes, correos, fotos, etc.).</li>
+		   <li>No se permite hacer publicidad o invitar a otras radios dentro del canal o por privado.</li>
+		   <li>Nos reservamos el derecho de moderar el privado de los DJ’s RL en caso de detectar SPAM o invitaciones inapropiadas.</li>
+		   <li>Solo se moderará el SPAM; las demás conversaciones están permitidas.</li>
+		   <li>DJ’s RL pueden emitir en otras radios, siempre que sea por iniciativa propia y sin usar el canal RL para promociones externas.</li>
+		   <li>Las convocatorias a nuevos DJ’s se hacen únicamente dentro del canal oficial #RitmoLatinos.</li>
+		   <h3>💬 Lo que Sí Está Permitido</h3>
+		   <li>Mayúsculas: permitidas (¡aquí la energía se siente en grande!).</li>
+		   <li>Repeticiones y flood: permitidos dentro de un límite razonable, bajo supervisión de la administración.</li>
+		   <li>SPAM positivo: se permiten links o anuncios autorizados por la administración de Ritmo Latinos.</li>
+		    <h3>🤖 Petición del Bot RL</h3>
+			<p class="muted">Para solicitar el bot de la radio en tu canal, escribe el comando !SOLICITO #canal en el privado del roBOT RitmoLatinos. Si el comando no funciona, contacta a un Admin o Root.</p>
+			<p class="muted">Requisitos básicos:</p>
+		   <li>El canal solicitante no debe tener conflictos con el Staff RL.</li>
+		   <li>El bot no debe ser baneado; si lo es, se suspenderá el servicio.</li>
+		   <li>El bot debe tener registro de voice (+) o sin registro; nunca de operador (@).</li>
+		   <li>No se permite ingresar el bot en canales de otras radios.</li>
+		   <li>Si un admin o founder retira el bot sin motivo, el servicio se suspenderá permanentemente.</li>
+		   <li>Si el bot es deopeado o baneado por abuso, se dará de baja automáticamente.</li>
+		   <h3>🎙️ Ingreso de DJ’s a Ritmo Latinos</h3>
+		   <li>No se admitirán DJ’s con nicks registrados por menos de 6 meses.</li>
+		   <li>No se permitirá el reingreso de DJ’s que hayan abandonado sus funciones.</li>
+		   <li>No se permitirá el reingreso de DJ’s que hayan tenido problemas de comportamiento dentro de la radio o en el canal general.</li>
+		   <h3>🌟 En Resumen:</h3>
+		   <p class="muted">Ritmo Latinos es una comunidad musical llena de alegría, respeto y buena vibra. Sigue las normas y disfruta del ambiente.</p>
+		   <p class="muted">🎶 La Radio Que Prende Tus Sentidos 🎶</p>
+		    <p class="muted">ATTE: Administración Ritmo Latinos Colombia Radio Chat 💫</p>
         </ol>
       </div>
     </section>
