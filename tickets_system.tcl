@@ -328,7 +328,7 @@ proc remove_specific_ticket {t_id nick} {
         set line_id [lindex $parts 0]
         set tnick [lindex $parts 1]
         
-        if {$line_id == $t_id && [string equal -nocase $tnick $nick]} {
+        if {[string equal $line_id $t_id] && [string equal -nocase $tnick $nick]} {
             set removed 1
             putserv "PRIVMSG $ops_channel :❌ Ticket $t_id de $nick eliminado (no reconectó a tiempo)."
             continue
@@ -737,12 +737,12 @@ proc show_help {nick uhost hand chan text} {
         putserv "NOTICE $nick :         ℹ **CENTRO DE AYUDA** ℹ      "
         putserv "NOTICE $nick :"
         putserv "NOTICE $nick : **Comandos disponibles para usuarios:**    "
-        putserv "NOTICE $nick :   ℹ️ **!ticket <mensaje>** 				   "
+        putserv "NOTICE $nick :   ℹ️ **!ticket <mensaje>** 			   "
         putserv "NOTICE $nick :      ◦ Crear un nuevo ticket de soporte    "
         putserv "NOTICE $nick :      ◦ Ejemplo: !ticket No puedo conectarme"
-        putserv "NOTICE $nick :   ℹ️ **!help**							   "
+        putserv "NOTICE $nick :   ℹ️ **!help**				   "
         putserv "NOTICE $nick :      ◦ Mostrar este menú de ayuda          "
-        putserv "NOTICE $nick :   ℹ️  **Información importante:** 		   "
+        putserv "NOTICE $nick :   ℹ️  **Información importante:** 	   "
         putserv "NOTICE $nick :      ◦ Un operador te atenderá en breve    "
         putserv "NOTICE $nick :      ◦ Por favor sé específico en tu problema   "
         putserv "NOTICE $nick :      ◦ Límite: 5 tickets por día por usuario    "
@@ -750,29 +750,29 @@ proc show_help {nick uhost hand chan text} {
         putserv "NOTICE $nick :	ℹ️ **Tip:** Describe tu problema con detalle para una atención más rápida.	"
         
     } elseif {$chan eq $ops_channel} {
-        putserv "PRIVMSG $ops_channel :       ℹ️ **PANEL DE OPERADORES** ℹ️   			  "
+        putserv "PRIVMSG $ops_channel :       ℹ️ **PANEL DE OPERADORES** ℹ️    		  "
         putserv "PRIVMSG $ops_channel :"
-        putserv "PRIVMSG $ops_channel : 	**Comandos de administración de tickets:**        "
-        putserv "PRIVMSG $ops_channel :   ✅ **!tickets** 									  "
+        putserv "PRIVMSG $ops_channel :  	**Comandos de administración de tickets:**        "
+        putserv "PRIVMSG $ops_channel :   ✅ **!tickets** 				  "
         putserv "PRIVMSG $ops_channel :      ◦ Listar todos los tickets pendientes            "
         putserv "PRIVMSG $ops_channel :      ◦ Muestra ID, usuario y estado                   "
-        putserv "PRIVMSG $ops_channel :   ✅ **!ayuda <ID|nick>** 							  "
+        putserv "PRIVMSG $ops_channel :   ✅ **!ayuda <ID|nick>** 			  "
         putserv "PRIVMSG $ops_channel :      ◦ Tomar un ticket para atención                  "
         putserv "PRIVMSG $ops_channel :      ◦ Ejemplo: !ayuda 12345  o  !ayuda UsuarioEjemplo"
-        putserv "PRIVMSG $ops_channel :   ✅ **!fin <ID|nick>** 							  "
+        putserv "PRIVMSG $ops_channel :   ✅ **!fin <ID|nick>** 			  "
         putserv "PRIVMSG $ops_channel :      ◦ Cerrar ticket específico o todos de un usuario "
         putserv "PRIVMSG $ops_channel :      ◦ !fin 12345 → cierra ticket ID 12345            "
         putserv "PRIVMSG $ops_channel :      ◦ !fin Usuario → cierra TODOS sus tickets        "
-        putserv "PRIVMSG $ops_channel :   ℹ️ **!estadisticas** 								  "
+        putserv "PRIVMSG $ops_channel :   ℹ️ **!estadisticas** 			  "
         putserv "PRIVMSG $ops_channel :      ◦ Ver estadísticas del sistema                   "
-        putserv "PRIVMSG $ops_channel :   ℹ️  **!info** 									  "
+        putserv "PRIVMSG $ops_channel :   ℹ️  **!info** 				  "
         putserv "PRIVMSG $ops_channel :      ◦ Ver información de configuración del sistema   "
         putserv "PRIVMSG $ops_channel :"
         putserv "PRIVMSG $ops_channel :  **Tiempos automáticos del sistema:**                 "
-        putserv "PRIVMSG $ops_channel :   ⏰ 10 min → Aviso de espera al usuario 			  "
-        putserv "PRIVMSG $ops_channel :   ⏰ 30 min → Escalación a operadores 				  "
-        putserv "PRIVMSG $ops_channel :   ⏰ 60 min → Cierre automático 					  "
-        putserv "PRIVMSG $ops_channel :   ⏰ 10 min → Eliminación si usuario no regresa 	  "
+        putserv "PRIVMSG $ops_channel :   ⏰ 10 min → Aviso de espera al usuario  "
+        putserv "PRIVMSG $ops_channel :   ⏰ 30 min → Escalación a operadores    "
+        putserv "PRIVMSG $ops_channel :   ⏰ 60 min → Cierre automático            "
+        putserv "PRIVMSG $ops_channel :   ⏰ 10 min → Eliminación si usuario no regresa    "
         putserv "PRIVMSG $ops_channel :"
         putserv "PRIVMSG $ops_channel : ℹ️**Recordatorio:** Siempre notificar al usuario cuando se tome o cierre un ticket."
         
@@ -781,10 +781,10 @@ proc show_help {nick uhost hand chan text} {
         putserv "NOTICE $nick :"
         putserv "NOTICE $nick :  Este comando solo está disponible en:   "
         putserv "NOTICE $nick :                                          "
-        putserv "NOTICE $nick :   ℹ️ **$support_channel** 			     "
+        putserv "NOTICE $nick :   ℹ️ **$support_channel** 	     "
         putserv "NOTICE $nick :      ◦ Para solicitar ayuda técnica      "
         putserv "NOTICE $nick :                                          "
-        putserv "NOTICE $nick :   ℹ️  **$ops_channel**	       			 "
+        putserv "NOTICE $nick :   ℹ️  **$ops_channel**			 "
         putserv "NOTICE $nick :      ◦ Para operadores del sistema       "
     }
 }
@@ -792,36 +792,51 @@ proc show_help {nick uhost hand chan text} {
 # Comando de estadísticas para operadores
 bind pub - "!estadisticas" show_stats
 bind pub - "!stats" show_stats
-
+bind pub - "!info" show_system_info
+# -------------------------------------------------------------
+# 📊 Estadísticas del sistema de tickets (versión final)
+# -------------------------------------------------------------
 proc show_stats {nick uhost hand chan text} {
     global tickets_file ops_channel support_channel
-    
+
     # Verificar licencia antes de ejecutar
     if {![license::is_validated]} {
         putserv "NOTICE $nick :❌ Sistema no autorizado. Contacta al administrador."
         return
     }
 
+    # Solo operadores pueden usarlo
     if {$chan ne $ops_channel} { return }
-    
+
+    # Cargar tickets desde memoria (más rápido y evita I/O repetida)
     set lines [get_cached_tickets]
+
     set total_tickets 0
     set pending_tickets 0
-    set assigned_tickets 0
+    set inprogress_tickets 0
+    set closed_tickets 0
     array set operators {}
-    
+
+    # Procesar cada línea del archivo de tickets
     foreach line $lines {
-        if {$line eq ""} continue
-        set parts [split $line ";"]
+        set line_trimmed [string trim $line]
+        if {$line_trimmed eq ""} continue
+        
+        set parts [split $line_trimmed ";"]
         if {[llength $parts] < 5} continue
-        
+
         incr total_tickets
-        set asignado [lindex $parts 4]
-        
-        if {$asignado eq "-" || $asignado eq ""} {
+        set asignado [string trim [lindex $parts 4]]
+
+        # Clasificación de ticket
+        if {[string equal -nocase $asignado "CLOSED"]} {
+            incr closed_tickets
+        } elseif {$asignado eq "-" || $asignado eq ""} {
             incr pending_tickets
         } else {
-            incr assigned_tickets
+            incr inprogress_tickets
+
+            # Contar tickets por operador
             if {[info exists operators($asignado)]} {
                 incr operators($asignado)
             } else {
@@ -829,67 +844,74 @@ proc show_stats {nick uhost hand chan text} {
             }
         }
     }
-    
-    putserv "PRIVMSG $ops_channel :      ℹ️ **ESTADÍSTICAS DEL SISTEMA** ℹ️ 	 "
-    putserv "PRIVMSG $ops_channel :"
-    putserv "PRIVMSG $ops_channel :             **Resumen general:**	         "
-    putserv "PRIVMSG $ops_channel :   ℹ️ Total de tickets: $total_tickets        "
-    putserv "PRIVMSG $ops_channel :   ❌ Pendientes: $pending_tickets            "
-    putserv "PRIVMSG $ops_channel :   ✅ Atendidos: $assigned_tickets            "
-    
+
+    # Cálculos derivados
+    set processed [expr {$inprogress_tickets + $closed_tickets}]
+
+    # Enviar reporte al canal de operadores
+    putserv "PRIVMSG $ops_channel :────────────────────────────────────"
+    putserv "PRIVMSG $ops_channel :    📊 **RESUMEN DEL SISTEMA DE TICKETS**"
+    putserv "PRIVMSG $ops_channel :────────────────────────────────────"
+    putserv "PRIVMSG $ops_channel :📝 Total de tickets: $total_tickets"
+    putserv "PRIVMSG $ops_channel :⭕ Pendientes (sin asignar): $pending_tickets"
+    putserv "PRIVMSG $ops_channel :🔄 En proceso (asignados): $inprogress_tickets"
+    putserv "PRIVMSG $ops_channel :✅ Resueltos (CLOSED): $closed_tickets"
+    putserv "PRIVMSG $ops_channel :📦 Procesados (en proceso + resueltos): $processed"
+
+    # Porcentaje de eficiencia
     if {$total_tickets > 0} {
-        set porcentaje [expr {double($assigned_tickets) * 100 / $total_tickets}]
-        putserv "PRIVMSG $ops_channel :   ℹ Eficiencia: [format "%.1f" $porcentaje]% "
+        set porcentaje [expr {double($processed) * 100.0 / $total_tickets}]
+        putserv "PRIVMSG $ops_channel :📈 Eficiencia: [format "%.2f" $porcentaje]%"
     }
-    
+
+    # Tickets por operador
     if {[array size operators] > 0} {
-        putserv "PRIVMSG $ops_channel : **Tickets por operador:**                      "
+        putserv "PRIVMSG $ops_channel :────────────────────────────────────"
+        putserv "PRIVMSG $ops_channel :👤 **Tickets gestionados por operador:**"
+
         set count 0
-        foreach op [lsort [array names operators]] {
+        foreach op [lsort -dictionary [array names operators]] {
             incr count
-            if {$count <= 5} {
-                putserv "PRIVMSG $ops_channel :   ℹ $op: $operators($op) tickets      "
+            if {$count <= 10} {
+                putserv "PRIVMSG $ops_channel :   • $op → $operators($op) tickets"
             }
         }
-        if {[array size operators] > 5} {
-            putserv "PRIVMSG $ops_channel :   ... y [expr {[array size operators] - 5}] operadores más "
+
+        if {[array size operators] > 10} {
+            set restantes [expr {[array size operators] - 10}]
+            putserv "PRIVMSG $ops_channel :   ... y $restantes operadores más"
         }
     }
-    
+
+    putserv "PRIVMSG $ops_channel :────────────────────────────────────"
     putserv "PRIVMSG $ops_channel :"
 }
 
-# Comando de información del sistema
-bind pub - "!info" show_system_info
-bind pub - "!sistema" show_system_info
-
+# --- AÑADIMOS show_system_info requerido por el validador de licencia ---
 proc show_system_info {nick uhost hand chan text} {
-    global bot_name bot_version support_channel ops_channel ticket_timers max_daily_tickets
-    
+    global bot_name bot_version ops_channel support_channel ticket_timers max_daily_tickets
+
     # Verificar licencia antes de ejecutar
     if {![license::is_validated]} {
         putserv "NOTICE $nick :❌ Sistema no autorizado. Contacta al administrador."
         return
     }
 
-    if {$chan eq $ops_channel} {
-        putserv "PRIVMSG $ops_channel :         ℹ️ **INFORMACIÓN DEL SISTEMA** ℹ️     "
-        putserv "PRIVMSG $ops_channel :"
-        putserv "PRIVMSG $ops_channel : 		ℹ️	**Configuración actual:**   ℹ️       "
-        putserv "PRIVMSG $ops_channel :"
-        putserv "PRIVMSG $ops_channel :    Bot: $bot_name v$bot_version          	   "
-        putserv "PRIVMSG $ops_channel :    Canal soporte: $support_channel    	 	   "
-        putserv "PRIVMSG $ops_channel :    Canal operadores: $ops_channel      	       "
-        putserv "PRIVMSG $ops_channel :    Límite diario: $max_daily_tickets tickets/usuario	"
-        putserv "PRIVMSG $ops_channel :"
-        putserv "PRIVMSG $ops_channel : 		ℹ️	**Temporizadores automáticos:**  ℹ️            "
-        putserv "PRIVMSG $ops_channel :"
-        putserv "PRIVMSG $ops_channel :    Aviso: [expr {$ticket_timers(warn)/60}] min | Escalación: [expr {$ticket_timers(escalate)/60}] min "
-        putserv "PRIVMSG $ops_channel :    Cierre: [expr {$ticket_timers(autoclose)/60}] min "
-        putserv "PRIVMSG $ops_channel :"
-    } else {
-        putserv "NOTICE $nick :ℹEste comando solo está disponible para operadores en $ops_channel"
-    }
+    # Solo operadores pueden usarlo
+    if {$chan ne $ops_channel} { return }
+
+    set hora [clock format [clock seconds] -format {%Y-%m-%d %H:%M:%S}]
+
+    putserv "PRIVMSG $ops_channel :────────────────────────────────────"
+    putserv "PRIVMSG $ops_channel :🔧 **INFORMACIÓN DEL SISTEMA**"
+    putserv "PRIVMSG $ops_channel :────────────────────────────────────"
+    putserv "PRIVMSG $ops_channel :🤖 Bot: $bot_name v$bot_version"
+    putserv "PRIVMSG $ops_channel :🕒 Hora actual: $hora"
+    putserv "PRIVMSG $ops_channel :📌 Canal soporte: $support_channel"
+    putserv "PRIVMSG $ops_channel :📌 Canal operadores: $ops_channel"
+    putserv "PRIVMSG $ops_channel :📌 Límite diario: $max_daily_tickets tickets/usuario"
+    putserv "PRIVMSG $ops_channel :📌 Temporizadores (min): Aviso=[expr {$ticket_timers(warn)/60}] Escalación=[expr {$ticket_timers(escalate)/60}] Cierre=[expr {$ticket_timers(autoclose)/60}]"
+    putserv "PRIVMSG $ops_channel :────────────────────────────────────"
 }
 
 # Mensaje de carga en partyline
