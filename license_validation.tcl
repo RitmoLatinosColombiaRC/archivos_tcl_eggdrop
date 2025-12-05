@@ -64,7 +64,7 @@ namespace eval license {
         if {[regexp "$key=\\s*(\[^\\r\\n\]+)" $data -> value]} {
             set value [string trim $value]
             # Validar caracteres seguros
-            if {[regexp {[<>"'&;|]} $value]} {
+            if {[regexp {[<>\"'&;|]} $value]} {
                 throw INVALID_CHARS "Caracteres inválidos en valor: $key"
             }
             return $value
@@ -347,3 +347,4 @@ if {[catch {
     
     exit 1
 }
+
