@@ -3,7 +3,7 @@
 Script TCL para Eggdrop que implementa un sistema completo de soporte técnico vía IRC, pensado para canales de ayuda como `#Ayuda`, con gestión de tickets por parte de operadores, protección antiflood y estadísticas del canal.
 
 - **Autor:** Atomico
-- **Red IRC:** `irc.ritmolatinoscrc.com` (SSL/TLS: `+6697`, SASL opcional)
+- **Network IRC:** `irc.ritmolatinoscrc.com` (SSL/TLS: `+6697`, SASL opcional)
 - **Web:** https://www.ritmolatinoscrc.com
 - **WebChat:** https://webchat.ritmolatinoscrc.com/#ayuda
 - **Canal de soporte:** `#Ayuda`
