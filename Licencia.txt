@@ -1,0 +1,75 @@
+SISTEMA DE TICKETS PARA EGGDROP IRC CON ANTIFLOOD
+LICENCIA: CÓDIGO VISIBLE GRATUITO CON MODIFICACIÓN RESTRINGIDA
+(Source-Available, modificación solo con permiso del autor)
+
+Copyright (c) Atomico / Ritmo Latinos Colombia.
+Todos los derechos reservados.
+
+Red IRC: irc.ritmolatinoscrc.com (SSL/TLS: +6697, SASL opcional)
+Web:     https://www.ritmolatinoscrc.com
+WebChat: https://webchat.ritmolatinoscrc.com/#ayuda
+Canal:   #Ayuda
+
+-----------------------------------------------------------------------
+
+1. PERMISO DE USO GRATUITO
+
+Se concede permiso gratuito para descargar, ejecutar y usar este script
+en cualquier red IRC, siempre que se mantenga intacto este aviso de
+copyright y licencia en el código.
+
+2. PROHIBICIÓN DE VENTA O DISTRIBUCIÓN COMERCIAL
+
+Este script es TOTALMENTE GRATUITO. Queda terminantemente prohibido
+venderlo, cobrar por él, incluirlo en paquetes de pago, ofrecerlo como
+servicio remunerado, o distribuirlo a cambio de cualquier tipo de
+contraprestación económica (dinero, criptomonedas, donaciones
+obligatorias, suscripciones, etc.).
+
+Cualquier intento de distribución comercial de este script sin la
+autorización previa, expresa y por escrito del autor podrá ser
+perseguido y estará sujeto a las acciones legales que correspondan
+conforme a la legislación aplicable en materia de propiedad
+intelectual.
+
+3. PROHIBICIÓN DE MODIFICACIÓN SIN AUTORIZACIÓN
+
+NO está permitido modificar, adaptar, traducir, descompilar, ofuscar
+ni crear obras derivadas de este script sin el permiso previo, expreso
+y por escrito del autor.
+
+Si deseas proponer mejoras, adaptaciones o correcciones, debes
+contactar al autor para solicitar autorización. Las mejoras aprobadas
+podrán incorporarse al proyecto oficial, respetando la autoría
+original.
+
+4. PROHIBICIÓN DE REDISTRIBUCIÓN DE VERSIONES MODIFICADAS
+
+No se permite redistribuir, publicar ni compartir versiones
+modificadas de este script sin la autorización escrita del autor.
+
+La redistribución del script original sin cambios está permitida de
+forma gratuita, siempre que se incluya este aviso completo.
+
+5. CONTACTO PARA PERMISOS
+
+Para solicitar permiso de modificación, adaptación o cualquier uso no
+contemplado aquí, contacta al autor a través de:
+
+  - Canal #Ayuda en irc.ritmolatinoscrc.com
+  - WebChat: https://webchat.ritmolatinoscrc.com/#ayuda
+  - Web:     https://www.ritmolatinoscrc.com
+
+6. EXENCIÓN DE GARANTÍA
+
+ESTE SOFTWARE SE PROPORCIONA "TAL CUAL", SIN GARANTÍA DE NINGÚN TIPO,
+EXPRESA O IMPLÍCITA, INCLUYENDO PERO NO LIMITÁNDOSE A LAS GARANTÍAS DE
+COMERCIABILIDAD, IDONEIDAD PARA UN PROPÓSITO PARTICULAR Y NO
+INFRACCIÓN. EN NINGÚN CASO EL AUTOR SERÁ RESPONSABLE DE NINGUNA
+RECLAMACIÓN, DAÑO U OTRA RESPONSABILIDAD DERIVADA DEL USO DEL
+SOFTWARE.
+
+7. LEGISLACIÓN APLICABLE
+
+Esta licencia se rige por las leyes de Colombia, sin perjuicio de las
+normas internacionales de propiedad intelectual aplicables.
