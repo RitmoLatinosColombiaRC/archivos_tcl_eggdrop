@@ -28,7 +28,7 @@ El texto legal completo está disponible en el archivo [LICENSE](LICENSE).
 - ❌ **Prohibida la venta** o distribución comercial (con posibles acciones legales).
 - ❌ **Prohibida la modificación** sin permiso escrito del autor.
 - ❌ **Prohibida la redistribución** de versiones modificadas.
-- 📬 **Contacto para permisos:** `#Ayuda` en `irc.ritmolatinoscrc.com`, WebChat o web oficial.
+- 📬 **Contacto para permisos:** `#Ayuda` en `irc.ritmolatinoscrc.com (SSL/TLS: +6697, SASL opcional)`, WebChat o web oficial.
 
 ---
 
